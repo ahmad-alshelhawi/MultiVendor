@@ -1,0 +1,6 @@
+@AttarStore.WebApi_HostAddress = http://localhost:5151
+
+GET {{AttarStore.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
