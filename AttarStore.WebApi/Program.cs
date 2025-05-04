@@ -26,6 +26,15 @@ using IEmailSender = AttarStore.Infrastructure.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ─── EF Core DbContext ─────────────────────────────────────────────────────
+builder.Services.AddDbContextPool<AppDbContext>(options =>
+{
+    var connName = builder.Environment.IsDevelopment() ? "dev" : "main";
+    options.UseSqlServer(builder.Configuration.GetConnectionString(connName));
+});
+
+
+
 // ─── Cookie Policy ─────────────────────────────────────────────────────────
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -104,12 +113,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Product.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Product.Delete")));
 });
 
-// ─── EF Core DbContext ─────────────────────────────────────────────────────
-builder.Services.AddDbContextPool<AppDbContext>(options =>
-{
-    var connName = builder.Environment.IsDevelopment() ? "dev" : "main";
-    options.UseSqlServer(builder.Configuration.GetConnectionString(connName));
-});
 
 
 

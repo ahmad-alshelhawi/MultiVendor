@@ -31,13 +31,6 @@ namespace AttarStore.Services.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            // Suppress the pending-model-changes exception if any dynamic initializers remain
-            optionsBuilder
-                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
