@@ -4,6 +4,7 @@ using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505191441_init7")]
+    partial class init7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 19, 33, 43, 410, DateTimeKind.Unspecified).AddTicks(9843), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 19, 14, 40, 275, DateTimeKind.Unspecified).AddTicks(2196), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$NA6iAtYyziXSYLzC63nRt.5a.CjvZjDtkyNN9NNSbjjurWE2SN3G2",
+                            Password = "$2a$11$U/F8KsXzsboCB3JomyKf2O.WmFNFAfEgZQ/ygbO9U3ku3qDF8j8eW",
                             Phone = "096654467",
                             Role = "Admin"
                         });

@@ -4,6 +4,7 @@ using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505180430_init6")]
+    partial class init6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 19, 33, 43, 410, DateTimeKind.Unspecified).AddTicks(9843), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 18, 4, 29, 194, DateTimeKind.Unspecified).AddTicks(7219), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$NA6iAtYyziXSYLzC63nRt.5a.CjvZjDtkyNN9NNSbjjurWE2SN3G2",
+                            Password = "$2a$11$zahpTT6157xYxbqTvOzvLekv1KvRH1uG0SA6XCvCPQ7PfTTaB4M6K",
                             Phone = "096654467",
                             Role = "Admin"
                         });
@@ -652,6 +655,9 @@ namespace AttarStore.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -664,6 +670,35 @@ namespace AttarStore.Infrastructure.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SKU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId", "SKU")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariantAttribute", b =>
@@ -1053,35 +1088,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("ProductVariant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId", "Sku")
-                        .IsUnique();
-
-                    b.ToTable("ProductVariants");
-                });
-
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.RefreshToken", b =>
                 {
                     b.HasOne("AttarStore.Domain.Entities.Admin", "Admin")
@@ -1150,9 +1156,20 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariant", b =>
+                {
+                    b.HasOne("Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariantAttribute", b =>
                 {
-                    b.HasOne("ProductVariant", "ProductVariant")
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.ProductVariant", "ProductVariant")
                         .WithMany("Attributes")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1218,7 +1235,7 @@ namespace AttarStore.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProductVariant", "ProductVariant")
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1248,7 +1265,7 @@ namespace AttarStore.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProductVariant", "ProductVariant")
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1293,17 +1310,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("ProductVariant", b =>
-                {
-                    b.HasOne("Product", "Product")
-                        .WithMany("Variants")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("AttarStore.Domain.Entities.Admin", b =>
                 {
                     b.Navigation("RefreshTokens");
@@ -1317,6 +1323,11 @@ namespace AttarStore.Infrastructure.Migrations
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Category", b =>
                 {
                     b.Navigation("Subcategories");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariant", b =>
+                {
+                    b.Navigation("Attributes");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Subcategory", b =>
@@ -1369,11 +1380,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Variants");
-                });
-
-            modelBuilder.Entity("ProductVariant", b =>
-                {
-                    b.Navigation("Attributes");
                 });
 #pragma warning restore 612, 618
         }

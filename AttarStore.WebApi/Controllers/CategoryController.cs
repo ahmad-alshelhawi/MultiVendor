@@ -96,12 +96,25 @@ namespace AttarStore.Api.Controllers
 
         [HttpPost("{categoryId:int}/subcategories")]
         [Authorize(Policy = "Category.Create")]
-        public async Task<IActionResult> CreateSub(int categoryId, [FromBody] SubcategoryMapperCreate dto)
+        public async Task<IActionResult> CreateSub(
+     [FromRoute] int categoryId,
+     [FromBody] SubcategoryMapperCreate dto)
         {
+            // map the incoming DTO to your domain entity
             var sub = _mapper.Map<Subcategory>(dto);
+            // explicitly set the FK from the route
+            sub.CategoryId = categoryId;
+
             await _subRepo.AddAsync(sub);
-            return CreatedAtAction(nameof(GetSubById), new { id = sub.Id }, _mapper.Map<SubcategoryMapperView>(sub));
+
+            var view = _mapper.Map<SubcategoryMapperView>(sub);
+            return CreatedAtAction(
+                nameof(GetSubById),
+                new { id = sub.Id },
+                view
+            );
         }
+
 
         [HttpPut("subcategories/{id:int}")]
         [Authorize(Policy = "Category.Update")]

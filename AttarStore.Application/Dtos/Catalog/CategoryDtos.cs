@@ -37,8 +37,8 @@ namespace AttarStore.Application.Dtos.Catalog
 
     public class SubcategoryMapperCreate
     {
-        [Required] public int CategoryId { get; set; }
-        [Required] public string Name { get; set; }
+/*        [Required] public int CategoryId { get; set; }
+*/        [Required] public string Name { get; set; }
         public string ImageUrl { get; set; }
         public string Description { get; set; }
     }

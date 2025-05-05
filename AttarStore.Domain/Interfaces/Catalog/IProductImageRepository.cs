@@ -10,6 +10,5 @@ namespace AttarStore.Domain.Interfaces.Catalog
     public interface IProductImageRepository
     {
         Task<ProductImage> AddAsync(ProductImage image);
-        // optionally: Task<IEnumerable<ProductImage>> GetByProductAsync(int productId);
     }
 }

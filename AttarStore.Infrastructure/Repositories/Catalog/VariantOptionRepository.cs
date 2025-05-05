@@ -2,50 +2,44 @@
 using AttarStore.Domain.Interfaces.Catalog;
 using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AttarStore.Infrastructure.Repositories.Catalog
+public class VariantOptionRepository : IVariantOptionRepository
 {
-    public class VariantOptionRepository : IVariantOptionRepository
+    private readonly AppDbContext _db;
+    public VariantOptionRepository(AppDbContext db) => _db = db;
+
+    public Task<VariantOption[]> GetAllOptionsAsync()
+        => _db.VariantOptions.ToArrayAsync();
+
+    public Task<VariantOption> GetOptionByIdAsync(int id)
+        => _db.VariantOptions.FindAsync(id).AsTask();
+
+    public async Task AddOptionAsync(VariantOption opt)
     {
-        private readonly AppDbContext _db;
+        _db.VariantOptions.Add(opt);
+        await _db.SaveChangesAsync();
+    }
 
-        public VariantOptionRepository(AppDbContext db)
-        {
-            _db = db;
-        }
+    public async Task DeleteOptionAsync(int id)
+    {
+        var o = await _db.VariantOptions.FindAsync(id);
+        if (o != null) { _db.VariantOptions.Remove(o); await _db.SaveChangesAsync(); }
+    }
 
-        public async Task<IEnumerable<VariantOption>> GetAllOptionsAsync()
-        {
-            return await _db.VariantOptions
-                            .Include(o => o.Values)
-                            .ToListAsync();
-        }
+    public Task<VariantOptionValue[]> GetValuesByOptionAsync(int optionId)
+        => _db.VariantOptionValues
+              .Where(v => v.VariantOptionId == optionId)
+              .ToArrayAsync();
 
-        public async Task<IEnumerable<VariantOptionValue>> GetValuesByOptionAsync(int optionId)
-        {
-            return await _db.VariantOptionValues
-                            .AsNoTracking()
-                            .Where(v => v.VariantOptionId == optionId)
-                            .ToListAsync();
-        }
+    public async Task AddValueAsync(VariantOptionValue v)
+    {
+        _db.VariantOptionValues.Add(v);
+        await _db.SaveChangesAsync();
+    }
 
-        public async Task<VariantOption> AddOptionAsync(VariantOption option)
-        {
-            _db.VariantOptions.Add(option);
-            await _db.SaveChangesAsync();
-            return option;
-        }
-
-        public async Task<VariantOptionValue> AddOptionValueAsync(VariantOptionValue value)
-        {
-            _db.VariantOptionValues.Add(value);
-            await _db.SaveChangesAsync();
-            return value;
-        }
+    public async Task DeleteValueAsync(int id)
+    {
+        var v = await _db.VariantOptionValues.FindAsync(id);
+        if (v != null) { _db.VariantOptionValues.Remove(v); await _db.SaveChangesAsync(); }
     }
 }

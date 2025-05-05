@@ -21,8 +21,9 @@ public class VendorUsersController : ControllerBase
 
     // GET /api/vendors/{vendorId}/users
     [HttpGet]
-    [Authorize(Roles = "VendorAdmin")]
-    public async Task<ActionResult<UserMapperView[]>> GetByVendor(int vendorId)
+    [Authorize(Roles = "Admin")]
+/*    [Authorize(Policy = "VendorUser.Read")]
+*/    public async Task<ActionResult<UserMapperView[]>> GetByVendor(int vendorId)
     {
         var users = await _userRepo.GetByVendorIdAsync(vendorId);
         return Ok(_mapper.Map<UserMapperView[]>(users));
@@ -30,8 +31,9 @@ public class VendorUsersController : ControllerBase
 
     // POST /api/vendors/{vendorId}/users
     [HttpPost]
-    [Authorize(Roles = "VendorAdmin")]
-    public async Task<IActionResult> Create(
+    [Authorize(Roles = "Admin")]
+/*    [Authorize(Policy = "VendorUser.Read")]
+*/    public async Task<IActionResult> Create(
         int vendorId,
         [FromBody] VendorUserCreate dto)
     {

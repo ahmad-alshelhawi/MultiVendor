@@ -1,14 +1,15 @@
-﻿// WebApi/Controllers/ProductController.cs
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using AttarStore.Application.Dtos.Catalog;
 using AttarStore.Domain.Entities.Catalog;
+using AttarStore.Domain.Interfaces;
 using AttarStore.Domain.Interfaces.Catalog;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace AttarStore.WebApi.Controllers
 {
@@ -17,6 +18,8 @@ namespace AttarStore.WebApi.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepo;
+        private readonly IVendorRepository _vendorRepo;
+
         private readonly IVariantOptionRepository _optionRepo;
         private readonly IProductVariantRepository _variantRepo;
         private readonly IProductImageRepository _imageRepo;
@@ -29,7 +32,9 @@ namespace AttarStore.WebApi.Controllers
             IProductVariantRepository variantRepo,
             IProductImageRepository imageRepo,
             IWebHostEnvironment env,
-            IMapper mapper)
+            IMapper mapper,
+            IVendorRepository vendorRepo
+            )
         {
             _productRepo = productRepo;
             _optionRepo = optionRepo;
@@ -37,9 +42,10 @@ namespace AttarStore.WebApi.Controllers
             _imageRepo = imageRepo;
             _env = env;
             _mapper = mapper;
+            _vendorRepo = vendorRepo;
         }
 
-        // ─── Standard CRUD for Products ─────────────────────────────────────────
+        // ─── PRODUCTS ──────────────────────────────────────────────────────────
 
         [HttpGet]
         [Authorize(Policy = "Product.Read")]
@@ -65,11 +71,18 @@ namespace AttarStore.WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Map and persist
+            // 1) Ensure the Vendor actually exists (and the caller is allowed)
+            var vendor = await _vendorRepo.GetByIdAsync(dto.VendorId);
+            if (vendor == null)
+                return BadRequest($"Vendor {dto.VendorId} not found");
+
+            // 2) Map the DTO
             var entity = _mapper.Map<Product>(dto);
+
+            // 3) Persist via your updated repository
             await _productRepo.AddAsync(entity);
 
-            // Reload with includes for the view
+            // 4) Reload with includes to return full view
             var created = await _productRepo.GetByIdAsync(entity.Id);
             var result = _mapper.Map<ProductMapperView>(created);
 
@@ -102,7 +115,7 @@ namespace AttarStore.WebApi.Controllers
             return NoContent();
         }
 
-        // ─── Variant‐Attribute Metadata ─────────────────────────────────────────
+        // ─── VARIANT‐ATTRIBUTE METADATA ────────────────────────────────────────
 
         [HttpGet("variant-options")]
         [Authorize(Policy = "Product.Read")]
@@ -121,7 +134,7 @@ namespace AttarStore.WebApi.Controllers
             return Ok(_mapper.Map<VariantOptionValueDto[]>(vals));
         }
 
-        // ─── Product Variants ────────────────────────────────────────────────────
+        // ─── VARIANTS ──────────────────────────────────────────────────────────
 
         [HttpGet("{productId}/variants")]
         [Authorize(Policy = "Product.Read")]
@@ -176,33 +189,27 @@ namespace AttarStore.WebApi.Controllers
             return NoContent();
         }
 
-        // ─── Image Upload ────────────────────────────────────────────────────────
+        // ─── IMAGE UPLOAD ───────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Upload one image for a product
-        /// </summary>
+        /// <summary>Upload one image for a product</summary>
         [HttpPost("{productId}/images")]
         [Authorize(Policy = "Product.Update")]
         public async Task<IActionResult> UploadImage(
             int productId,
             [FromForm] ProductImageUploadDto dto)
         {
-            // 1) ensure product exists
             var product = await _productRepo.GetByIdAsync(productId);
             if (product == null) return NotFound();
 
-            // 2) build unique filename
             var ext = Path.GetExtension(dto.File.FileName);
             var fileName = $"{Guid.NewGuid()}{ext}";
             var imagesDir = Path.Combine(_env.WebRootPath, "images");
             Directory.CreateDirectory(imagesDir);
-            var savePath = Path.Combine(imagesDir, fileName);
 
-            // 3) save file
+            var savePath = Path.Combine(imagesDir, fileName);
             using var stream = System.IO.File.Create(savePath);
             await dto.File.CopyToAsync(stream);
 
-            // 4) persist URL in DB
             var img = new ProductImage
             {
                 ProductId = productId,
@@ -210,12 +217,9 @@ namespace AttarStore.WebApi.Controllers
             };
             await _imageRepo.AddAsync(img);
 
-            // 5) return the new record
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = productId },
-                new { img.Id, img.Url }
-            );
+            return CreatedAtAction(nameof(GetById),
+                                   new { id = productId },
+                                   new { img.Id, img.Url });
         }
     }
 }

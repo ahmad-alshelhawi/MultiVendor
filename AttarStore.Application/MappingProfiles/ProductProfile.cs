@@ -1,11 +1,6 @@
-﻿using AttarStore.Application.Dtos.Catalog;
+﻿using AutoMapper;
+using AttarStore.Application.Dtos.Catalog;
 using AttarStore.Domain.Entities.Catalog;
-using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AttarStore.Application.MappingProfiles
 {
@@ -13,50 +8,68 @@ namespace AttarStore.Application.MappingProfiles
     {
         public ProductProfile()
         {
-            // ─── Product → ViewDTO ────────────────────────────────────────
-            CreateMap<Product, ProductMapperView>()
-                .ForMember(dest => dest.ImageUrls,
-                    opt => opt.MapFrom(src => src.Images.Select(i => i.Url)))
-                .ForMember(dest => dest.Variants,
-                    opt => opt.MapFrom(src => src.Variants))
-                 .ForMember(d => d.VendorName, opt => opt.MapFrom(src => src.Vendor.Name));
+            // ─── Product Mappings ────────────────────────────────────────
 
-            // ─── CreateDTO → Product ───────────────────────────────────────
+            // Create DTO → Entity
+            CreateMap<ProductMapperCreate, Product>();
+
+            // Update DTO → Entity
+            CreateMap<ProductMapperUpdate, Product>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // Entity → View DTO
+            CreateMap<Product, ProductMapperView>()
+                .ForMember(vm => vm.ImageUrls,
+                           opt => opt.MapFrom(p => p.Images.Select(img => img.Url)))
+                .ForMember(vm => vm.Variants,
+                           opt => opt.MapFrom(p => p.Variants));
             CreateMap<ProductMapperCreate, Product>()
+            .ForMember(dest => dest.Images,
+                       opt => opt.Ignore())
             .ForMember(dest => dest.Variants,
                        opt => opt.MapFrom(src => src.Variants));
 
-            // ─── UpdateDTO → Product (skip nulls) ───────────────────────────
-            CreateMap<ProductMapperUpdate, Product>()
-                .ForAllMembers(opts =>
-                    opts.Condition((src, dest, srcMember) => srcMember != null));
+            // ─── Variant‐Option Metadata ─────────────────────────────────
 
-            // ─── Variant mappings ────────────────────────────────────────────
-            CreateMap<ProductVariant, ProductVariantMapperView>();
-            CreateMap<ProductVariantCreateMapper, ProductVariant>();
-
-
-            // Option & Value
             CreateMap<VariantOption, VariantOptionDto>();
             CreateMap<VariantOptionValue, VariantOptionValueDto>();
 
-            // ProductVariant → View
+            // ─── ProductVariant Mappings ────────────────────────────────
+
+            // Create DTO → Entity
+            CreateMap<ProductVariantCreateDto, ProductVariant>();
+
+            // Entity → View DTO
             CreateMap<ProductVariant, ProductVariantMapperView>()
-                .ForMember(dest => dest.SelectedOptions,
-                           opt => opt.MapFrom(src => src.Attributes.Select(a => a.VariantOptionValue)));
+                .ForMember(vm => vm.Attributes,
+                           opt => opt.MapFrom(v => v.Attributes));
 
-            // Create DTO → ProductVariant + join‐table
-            CreateMap<ProductVariantCreateDto, ProductVariant>()
-                .ForMember(dest => dest.Attributes,
-                    opt => opt.MapFrom(src =>
-                        src.OptionValueIds.Select(valId => new ProductVariantAttribute
-                        {
-                            VariantOptionValueId = valId
-                        })));
+            // ─── Variant‐Attribute Mapping ──────────────────────────────
+
+            CreateMap<ProductVariantAttribute, VariantAttributeViewDto>()
+                .ForMember(vm => vm.OptionId, opt => opt.MapFrom(pa => pa.VariantOptionId))
+                .ForMember(vm => vm.ValueId, opt => opt.MapFrom(pa => pa.VariantOptionValueId))
+                .ForMember(vm => vm.OptionName, opt => opt.MapFrom(pa => pa.VariantOption.Name))
+                .ForMember(vm => vm.Value, opt => opt.MapFrom(pa => pa.VariantOptionValue.Value));
+
+            // CreateDto → Attribute join
+            CreateMap<VariantAttributeDto, ProductVariantAttribute>();
 
 
+            CreateMap<ProductVariantAttribute, VariantAttributeViewDto>()
+            .ForMember(vm => vm.OptionId, opt => opt.MapFrom(pa => pa.VariantOptionId))
+            .ForMember(vm => vm.ValueId, opt => opt.MapFrom(pa => pa.VariantOptionValueId))
+            .ForMember(vm => vm.OptionName, opt => opt.MapFrom(pa => pa.VariantOption.Name))
+            .ForMember(vm => vm.Value, opt => opt.MapFrom(pa => pa.VariantOptionValue.Value));
+
+            CreateMap<VariantAttributeDto, ProductVariantAttribute>();
 
 
+            CreateMap<VariantOption, VariantOptionDto>();
+            CreateMap<VariantOptionCreateDto, VariantOption>();
+
+            CreateMap<VariantOptionValue, VariantOptionValueDto>();
+            CreateMap<VariantOptionValueCreateDto, VariantOptionValue>();
         }
     }
 }

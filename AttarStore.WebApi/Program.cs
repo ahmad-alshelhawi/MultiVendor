@@ -115,6 +115,20 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CategoryRequest.Update", policy =>
         policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Update")));
 
+
+    options.AddPolicy("VendorUser.Read", policy => policy.Requirements.Add(
+      new PermissionRequirement("VendorUser.Read")
+    )
+  );
+    options.AddPolicy("VendorUser.Create", policy => policy.Requirements.Add(
+      new PermissionRequirement("VendorUser.Create")
+    )
+  );
+    options.AddPolicy("VendorUser.Update", policy => policy.Requirements.Add(
+      new PermissionRequirement("VendorUser.Update")
+    )
+  );
+
     // Order
     options.AddPolicy("Order.Create", policy => policy.Requirements.Add(new PermissionRequirement("Order.Create")));
     options.AddPolicy("Order.ReadAll", policy => policy.Requirements.Add(new PermissionRequirement("Order.ReadAll")));

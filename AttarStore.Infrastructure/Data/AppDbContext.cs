@@ -116,7 +116,7 @@ namespace AttarStore.Services.Data
                 .HasForeignKey(v => v.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ProductVariant>()
-                .HasIndex(v => new { v.ProductId, v.SKU }).IsUnique();
+                .HasIndex(v => new { v.ProductId, v.Sku }).IsUnique();
 
             // ─── Shopping Cart ───────────────────────────────────────────────────
             modelBuilder.Entity<Client>()
@@ -246,10 +246,14 @@ namespace AttarStore.Services.Data
                 new Permission { Id = 2, Name = "Category.Read", Description = "View categories" },
                 new Permission { Id = 3, Name = "Category.Update", Description = "Edit categories" },
                 new Permission { Id = 4, Name = "Category.Delete", Description = "Delete categories" },
+
+
                 new Permission { Id = 5, Name = "Product.Create", Description = "Create new products" },
                 new Permission { Id = 6, Name = "Product.Read", Description = "View products" },
                 new Permission { Id = 7, Name = "Product.Update", Description = "Edit products" },
                 new Permission { Id = 8, Name = "Product.Delete", Description = "Delete products" },
+
+
                 new Permission { Id = 9, Name = "Order.Create", Description = "Place orders" },
                 new Permission { Id = 10, Name = "Order.ReadAll", Description = "View all orders (admins)" },
                 new Permission { Id = 11, Name = "Order.ReadOwn", Description = "View own orders" },
@@ -265,8 +269,12 @@ namespace AttarStore.Services.Data
                 new Permission { Id = 18, Name = "CategoryRequest.Create", Description = "Vendor requests a new category" },
                 new Permission { Id = 19, Name = "CategoryRequest.ReadOwn", Description = "Vendor reads own category requests" },
                 new Permission { Id = 20, Name = "CategoryRequest.ReadAll", Description = "Admin reads all category requests" },
-                new Permission { Id = 21, Name = "CategoryRequest.Update", Description = "Admin approves/rejects requests" }
+                new Permission { Id = 21, Name = "CategoryRequest.Update", Description = "Admin approves/rejects requests" },
 
+                 // Permissions seed
+                new Permission { Id = 22, Name = "VendorUser.Create", Description = "Admin Add new user assigined to a Vendor" },
+                new Permission { Id = 23, Name = "VendorUser.Read", Description = "Admin reads users belong to a spicefic Vendor" },
+                new Permission { Id = 24, Name = "VendorUser.Update", Description = "Admin update User Belong to a Vendor" }
 
             );
 
@@ -310,7 +318,11 @@ namespace AttarStore.Services.Data
                 new RolePermission { Id = 33, RoleName = Roles.VendorAdmin, PermissionId = 18 },
                 new RolePermission { Id = 34, RoleName = Roles.VendorAdmin, PermissionId = 19 },
                 new RolePermission { Id = 35, RoleName = Roles.Admin, PermissionId = 20 },
-                new RolePermission { Id = 36, RoleName = Roles.Admin, PermissionId = 21 }
+                new RolePermission { Id = 36, RoleName = Roles.Admin, PermissionId = 21 },
+
+                new RolePermission { Id = 37, RoleName = Roles.Admin, PermissionId = 22 },
+                new RolePermission { Id = 38, RoleName = Roles.Admin, PermissionId = 23 },
+                new RolePermission { Id = 39, RoleName = Roles.Admin, PermissionId = 24 }
                 );
         }
     }
