@@ -101,6 +101,20 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Category.Update", policy => policy.Requirements.Add(new PermissionRequirement("Category.Update")));
     options.AddPolicy("Category.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Category.Delete")));
 
+    // Category Request
+
+    options.AddPolicy("CategoryRequest.Create", policy =>
+     policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Create")));
+
+    options.AddPolicy("CategoryRequest.ReadOwn", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadOwn")));
+
+    options.AddPolicy("CategoryRequest.ReadAll", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadAll")));
+
+    options.AddPolicy("CategoryRequest.Update", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Update")));
+
     // Order
     options.AddPolicy("Order.Create", policy => policy.Requirements.Add(new PermissionRequirement("Order.Create")));
     options.AddPolicy("Order.ReadAll", policy => policy.Requirements.Add(new PermissionRequirement("Order.ReadAll")));
@@ -118,10 +132,15 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Permission.Read", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Read")));
     options.AddPolicy("Permission.Update", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Update")));
     options.AddPolicy("Permission.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Delete")));
+    options.AddPolicy("Permission.Create", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Create")));
 
     // Users-Vendors
     options.AddPolicy("VendorUser.Read", policy => policy.Requirements.Add(new PermissionRequirement("User.ReadOwn")));
     options.AddPolicy("VendorUser.Create", policy => policy.Requirements.Add(new PermissionRequirement("User.Create")));
+
+    // If you want to distinguish admin-employees:
+    options.AddPolicy("AdminUser.Read", policy => policy.Requirements.Add(new PermissionRequirement("User.ReadOwn")));
+    options.AddPolicy("AdminUser.Create", policy => policy.Requirements.Add(new PermissionRequirement("User.Create")));
 
 });
 
@@ -145,6 +164,8 @@ builder.Services.AddScoped<ISubcategoryRepository, SubcategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IVariantOptionRepository, VariantOptionRepository>();
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
+
 
 // Shopping repositories
 builder.Services.AddScoped<ICartRepository, CartRepository>();

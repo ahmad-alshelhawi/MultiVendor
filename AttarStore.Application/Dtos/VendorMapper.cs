@@ -38,4 +38,6 @@ namespace AttarStore.Application.Dtos
         public string? Phone { get; set; }
         public string? Address { get; set; }
     }
+
+
 }

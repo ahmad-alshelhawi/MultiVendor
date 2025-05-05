@@ -9,16 +9,20 @@ namespace AttarStore.Api.Profiles
     {
         public UserProfile()
         {
+            // Create DTO → Entity
+            CreateMap<UserMapperCreate, User>()
+                // we set Role explicitly in controller, so ignore mapping here:
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
+
+            // Entity → View DTO (for returns)
             CreateMap<User, UserMapperView>();
 
-            CreateMap<UserMapperCreate, User>()
-                .ForMember(dest => dest.Password, opt => opt.Ignore());
-
+            // Update DTO → Entity
             CreateMap<UserMapperUpdate, User>()
-                .ForAllMembers(opts => opts.Condition((src, _, srcMember) => srcMember != null));
-
-            CreateMap<UserProfileUpdateMapper, User>()
-                .ForAllMembers(opts => opts.Condition((src, _, srcMember) => srcMember != null));
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<VendorUserCreate, User>()
+    .ForMember(dest => dest.Role, opt => opt.Ignore())
+    .ForMember(dest => dest.VendorId, opt => opt.Ignore());
         }
     }
 }

@@ -16,6 +16,7 @@ namespace AttarStore.Domain.Entities.Catalog
         public decimal Price { get; set; }
         public int Quantity { get; set; }
 
+        // ─── NEW navigation to attributes
         public ICollection<ProductVariantAttribute> Attributes { get; set; }
     }
 }

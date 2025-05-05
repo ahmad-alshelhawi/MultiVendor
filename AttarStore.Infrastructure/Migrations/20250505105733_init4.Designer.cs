@@ -4,6 +4,7 @@ using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505105733_init4")]
+    partial class init4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 13, 43, 32, 511, DateTimeKind.Unspecified).AddTicks(3487), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 10, 57, 32, 893, DateTimeKind.Unspecified).AddTicks(7402), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$ZJhFEC1HRel6L9xNjPKAi.rJ1i0.LjCJ6/Kp864zHDCw.jr8mJAkK",
+                            Password = "$2a$11$n3Xi9Ep0LdAznykHHlUEFug4jjJHY7P2C1VL5QSQVajiV4JhRQpAm",
                             Phone = "096654467",
                             Role = "Admin"
                         });
@@ -215,30 +218,6 @@ namespace AttarStore.Infrastructure.Migrations
                             Id = 17,
                             Description = "Remove permissions",
                             Name = "Permission.Delete"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            Description = "Vendor requests a new category",
-                            Name = "CategoryRequest.Create"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            Description = "Vendor reads own category requests",
-                            Name = "CategoryRequest.ReadOwn"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Description = "Admin reads all category requests",
-                            Name = "CategoryRequest.ReadAll"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Description = "Admin approves/rejects requests",
-                            Name = "CategoryRequest.Update"
                         });
                 });
 
@@ -498,30 +477,6 @@ namespace AttarStore.Infrastructure.Migrations
                             Id = 32,
                             PermissionId = 17,
                             RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 33,
-                            PermissionId = 18,
-                            RoleName = "VendorAdmin"
-                        },
-                        new
-                        {
-                            Id = 34,
-                            PermissionId = 19,
-                            RoleName = "VendorAdmin"
-                        },
-                        new
-                        {
-                            Id = 35,
-                            PermissionId = 20,
-                            RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 36,
-                            PermissionId = 21,
-                            RoleName = "Admin"
                         });
                 });
 
@@ -574,38 +529,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.CategoryRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("VendorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VendorId");
-
-                    b.ToTable("CategoryRequests");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductImage", b =>
@@ -1095,17 +1018,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.CategoryRequest", b =>
-                {
-                    b.HasOne("AttarStore.Domain.Entities.Vendor", "Vendor")
-                        .WithMany("CategoryRequests")
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vendor");
-                });
-
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductImage", b =>
                 {
                     b.HasOne("Product", "Product")
@@ -1329,8 +1241,6 @@ namespace AttarStore.Infrastructure.Migrations
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Vendor", b =>
                 {
-                    b.Navigation("CategoryRequests");
-
                     b.Navigation("Products");
 
                     b.Navigation("Users");

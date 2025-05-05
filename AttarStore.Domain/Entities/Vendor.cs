@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AttarStore.Domain.Entities.Catalog;
+using System;
 using System.Collections.Generic;
 
 namespace AttarStore.Domain.Entities
@@ -16,5 +17,9 @@ namespace AttarStore.Domain.Entities
         // Vendor’s users
         public ICollection<User> Users { get; set; }
             = new List<User>();
+        public ICollection<Product> Products { get; set; }
+            = new List<Product>();
+        public ICollection<CategoryRequest> CategoryRequests { get; set; }
+            = new List<CategoryRequest>();
     }
 }

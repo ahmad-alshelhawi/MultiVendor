@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿// WebApi/Authorization/PermissionRequirement.cs
+using Microsoft.AspNetCore.Authorization;
 
 namespace AttarStore.WebApi.Authorization
 {
     public class PermissionRequirement : IAuthorizationRequirement
     {
-        public string PermissionName { get; }
+        public string Permission { get; }
 
-        public PermissionRequirement(string permissionName)
-            => PermissionName = permissionName;
+        public PermissionRequirement(string permission)
+        {
+            Permission = permission;
+        }
     }
 }

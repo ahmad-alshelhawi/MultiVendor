@@ -1,4 +1,5 @@
-﻿using AttarStore.Domain.Entities.Catalog;
+﻿using AttarStore.Domain.Entities;
+using AttarStore.Domain.Entities.Catalog;
 
 public class Product
 {
@@ -6,6 +7,9 @@ public class Product
     public string Name { get; set; }
     public string Description { get; set; }
     public string Details { get; set; }   // rich text/markdown
+
+    public int VendorId { get; set; }
+    public Vendor Vendor { get; set; }
 
     public int? SubcategoryId { get; set; }
     public Subcategory Subcategory { get; set; }

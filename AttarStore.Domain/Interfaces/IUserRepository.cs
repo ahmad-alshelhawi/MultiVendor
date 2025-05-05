@@ -58,5 +58,7 @@ namespace AttarStore.Domain.Interfaces
         /// List all users belonging to the given vendor.
         /// </summary>
         Task<User[]> GetByVendorIdAsync(int vendorId);
+        Task<User[]> GetByAdminIdAsync(int adminId);
+
     }
 }

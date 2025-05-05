@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,7 +16,8 @@ namespace AttarStore.Application.Dtos.Catalog
         public string Description { get; set; }
         public string Details { get; set; }
         public int? SubcategoryId { get; set; }
-
+        public int VendorId { get; set; }
+        public string VendorName { get; set; }
         public List<string> ImageUrls { get; set; }
         public List<ProductVariantMapperView> Variants { get; set; }
     }
@@ -28,7 +30,7 @@ namespace AttarStore.Application.Dtos.Catalog
         public string Details { get; set; }
         public int? SubcategoryId { get; set; }
 
-        public List<string> ImageUrls { get; set; }
+        //public List<string> ImageUrls { get; set; }
         public List<ProductVariantCreateMapper> Variants { get; set; }
     }
 
@@ -86,5 +88,9 @@ namespace AttarStore.Application.Dtos.Catalog
         public IList<int> OptionValueIds { get; set; }
     }
 
-
+    public class ProductImageUploadDto
+    {
+        [Required]
+        public IFormFile File { get; set; }
+    }
 }

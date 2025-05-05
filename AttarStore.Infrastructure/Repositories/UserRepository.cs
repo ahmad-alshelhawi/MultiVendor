@@ -127,7 +127,13 @@ namespace AttarStore.Services.Repositories
                 if (!exists)
                     throw new InvalidOperationException($"Vendor {user.VendorId} not found.");
             }
-
+            // If AdminId provided, ensure the admin exists
+            if (user.AdminId.HasValue)
+            {
+                var exists = await _db.Admins.AnyAsync(a => a.Id == user.AdminId);
+                if (!exists)
+                    throw new InvalidOperationException($"Admin {user.AdminId} not found.");
+            }
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
         }
@@ -264,5 +270,15 @@ namespace AttarStore.Services.Repositories
                 .AsNoTracking()
                 .Where(u => !u.IsDeleted && u.VendorId == vendorId)
                 .ToArrayAsync();
+
+
+        public async Task<User[]> GetByAdminIdAsync(int adminId)
+    => await _db.Users
+        .AsNoTracking()
+        .Where(u => !u.IsDeleted && u.AdminId == adminId)
+        .ToArrayAsync();
+
     }
+
+
 }

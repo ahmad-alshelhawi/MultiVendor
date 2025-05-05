@@ -18,15 +18,13 @@ namespace AttarStore.Application.MappingProfiles
                 .ForMember(dest => dest.ImageUrls,
                     opt => opt.MapFrom(src => src.Images.Select(i => i.Url)))
                 .ForMember(dest => dest.Variants,
-                    opt => opt.MapFrom(src => src.Variants));
+                    opt => opt.MapFrom(src => src.Variants))
+                 .ForMember(d => d.VendorName, opt => opt.MapFrom(src => src.Vendor.Name));
 
             // ─── CreateDTO → Product ───────────────────────────────────────
             CreateMap<ProductMapperCreate, Product>()
-                .ForMember(dest => dest.Images,
-                    opt => opt.MapFrom(src =>
-                        src.ImageUrls.Select(url => new ProductImage { Url = url })))
-                .ForMember(dest => dest.Variants,
-                    opt => opt.MapFrom(src => src.Variants));
+            .ForMember(dest => dest.Variants,
+                       opt => opt.MapFrom(src => src.Variants));
 
             // ─── UpdateDTO → Product (skip nulls) ───────────────────────────
             CreateMap<ProductMapperUpdate, Product>()
@@ -55,6 +53,10 @@ namespace AttarStore.Application.MappingProfiles
                         {
                             VariantOptionValueId = valId
                         })));
+
+
+
+
         }
     }
 }

@@ -22,6 +22,8 @@ namespace AttarStore.Application.Dtos
         [Required] public string Password { get; set; }
         [Required] public string Phone { get; set; }
         public string Address { get; set; }
+        public string Role { get; set; }
+
     }
 
     // ─── Update DTO ───────────────────────────────────────────────────────────
@@ -31,6 +33,8 @@ namespace AttarStore.Application.Dtos
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public string? Address { get; set; }
+        public string Role { get; set; }
+
     }
 
     // ─── Profile‐Update DTO ───────────────────────────────────────────────────
@@ -47,5 +51,17 @@ namespace AttarStore.Application.Dtos
     {
         [Required] public string CurrentPassword { get; set; }
         [Required] public string NewPassword { get; set; }
+    }
+
+
+    // ─── VendorUserCreate DTO ──────────────────────────────────────────────────
+
+    public class VendorUserCreate
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string Phone { get; set; }
+        public string Address { get; set; }
     }
 }

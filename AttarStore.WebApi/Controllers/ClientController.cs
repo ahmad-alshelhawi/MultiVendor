@@ -1,12 +1,12 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using AttarStore.Application.Dtos;
+﻿using AttarStore.Application.Dtos;
+using AttarStore.Domain.Entities;
+using AttarStore.Domain.Entities.Auth;
+using AttarStore.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AttarStore.Domain.Interfaces;
-using AttarStore.Domain.Entities;
-using AttarStore.Domain.Entities.Auth;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AttarStore.WebApi.Controllers
 
@@ -63,17 +63,19 @@ namespace AttarStore.WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Check uniqueness
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest(new { status = "Password is required." });
+
             if (await _clientRepo.ExistsByNameOrEmailAsync(dto.Name, dto.Email))
                 return Conflict(new { status = "Name or email already exists." });
 
             var client = _mapper.Map<Client>(dto);
-            client.Password = BCrypt.Net.BCrypt.HashPassword(client.Password);
+            client.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password); // ✅ Use dto.Password directly
 
             await _clientRepo.AddAsync(client);
 
-            var view = _mapper.Map<ClientMapperView>(client);
-            return CreatedAtAction(nameof(GetById), new { id = client.Id }, view);
+            return CreatedAtAction(nameof(GetById), new { id = client.Id },
+                _mapper.Map<ClientMapperView>(client));
         }
 
         // PUT: api/Client/{id}

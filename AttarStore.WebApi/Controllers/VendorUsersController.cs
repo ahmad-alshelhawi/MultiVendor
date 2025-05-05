@@ -1,60 +1,62 @@
 ﻿using AttarStore.Application.Dtos;
 using AttarStore.Domain.Entities;
+using AttarStore.Domain.Entities.Auth;
 using AttarStore.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AttarStore.WebApi.Controllers
+[Route("api/vendors/{vendorId}/users")]
+[ApiController]
+public class VendorUsersController : ControllerBase
 {
+    private readonly IUserRepository _userRepo;
+    private readonly IMapper _mapper;
 
-
-    [Route("api/vendors/{vendorId}/users")]
-    [ApiController]
-    public class VendorUsersController : ControllerBase
+    public VendorUsersController(IUserRepository userRepo, IMapper mapper)
     {
-        private readonly IUserRepository _userRepo;
-        private readonly IMapper _mapper;
+        _userRepo = userRepo;
+        _mapper = mapper;
+    }
 
-        public VendorUsersController(IUserRepository userRepo, IMapper mapper)
-        {
-            _userRepo = userRepo;
-            _mapper = mapper;
-        }
+    // GET /api/vendors/{vendorId}/users
+    [HttpGet]
+    [Authorize(Roles = "VendorAdmin")]
+    public async Task<ActionResult<UserMapperView[]>> GetByVendor(int vendorId)
+    {
+        var users = await _userRepo.GetByVendorIdAsync(vendorId);
+        return Ok(_mapper.Map<UserMapperView[]>(users));
+    }
 
-        // GET /api/vendors/5/users
-        [HttpGet]
-        [Authorize(Policy = "VendorUser.Read")]
-        public async Task<ActionResult<UserMapperView[]>> GetByVendor(int vendorId)
-        {
-            var users = await _userRepo.GetByVendorIdAsync(vendorId);
-            return Ok(_mapper.Map<UserMapperView[]>(users));
-        }
+    // POST /api/vendors/{vendorId}/users
+    [HttpPost]
+    [Authorize(Roles = "VendorAdmin")]
+    public async Task<IActionResult> Create(
+        int vendorId,
+        [FromBody] VendorUserCreate dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        // POST /api/vendors/5/users
-        [HttpPost]
-        [Authorize(Policy = "VendorUser.Create")]
-        public async Task<IActionResult> Create(
-            int vendorId,
-            [FromBody] UserMapperCreate dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+        // 1) Map incoming DTO
+        var user = _mapper.Map<User>(dto);
 
-            var user = _mapper.Map<User>(dto);
-            user.VendorId = vendorId;
-            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+        // 2) Force vendor scope and role
+        user.VendorId = vendorId;
+        user.Role = Roles.VendorUser;
 
-            await _userRepo.AddAsync(user);
-            var result = _mapper.Map<UserMapperView>(user);
+        // 3) Hash password
+        user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-            return CreatedAtAction(
-                nameof(GetByVendor),
-                new { vendorId },
-                result
-            );
-        }
+        // 4) Persist
+        await _userRepo.AddAsync(user);
+
+        // 5) Return the created user
+        var result = _mapper.Map<UserMapperView>(user);
+        return CreatedAtAction(
+            nameof(GetByVendor),
+            new { vendorId },
+            result
+        );
     }
 }
-

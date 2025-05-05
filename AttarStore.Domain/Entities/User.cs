@@ -17,10 +17,12 @@ namespace AttarStore.Domain.Entities
         public string Phone { get; set; }
         public string Address { get; set; } = "";
 
-        // Role & optional vendor link
-        public string Role { get; set; } = Roles.Customer;
+        // Role & optional vendor/admin links
+        public string Role { get; set; }
         public int? VendorId { get; set; }
         public Vendor? Vendor { get; set; }
+        public int? AdminId { get; set; }
+        public Admin? Admin { get; set; }
 
         // Account state
         public bool IsDeleted { get; set; } = false;
@@ -31,7 +33,10 @@ namespace AttarStore.Domain.Entities
         public DateTime? ResetTokenExpiry { get; set; }
 
         // Refresh tokens
-        public ICollection<RefreshToken> RefreshTokens { get; set; }
-            = new List<RefreshToken>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
+        // ─── NEW: per-user permission overrides
+        public ICollection<UserPermission> UserPermissions { get; set; }
+            = new List<UserPermission>();
     }
 }

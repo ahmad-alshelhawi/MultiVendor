@@ -1,12 +1,12 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using AttarStore.Application.Dtos;
+﻿using AttarStore.Application.Dtos;
+using AttarStore.Domain.Entities;
+using AttarStore.Domain.Entities.Auth;
+using AttarStore.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AttarStore.Domain.Entities;
-using AttarStore.Domain.Interfaces;
-using AttarStore.Domain.Entities.Auth;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AttarStore.WebApi.Controllers
 {
@@ -61,11 +61,14 @@ namespace AttarStore.WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest(new { status = "Password is required." });
+
             if (await _userRepo.ExistsByNameOrEmailAsync(dto.Name, dto.Email))
                 return Conflict(new { status = "Name or email already exists." });
 
             var user = _mapper.Map<User>(dto);
-            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password); // Hash from DTO, not from mapped result
 
             await _userRepo.AddAsync(user);
 

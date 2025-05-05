@@ -16,6 +16,7 @@ namespace AttarStore.Infrastructure.Repositories.Catalog
 
         public async Task<Product[]> GetAllAsync()
             => await _db.Products
+                 .Include(p => p.Vendor)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
                 .AsNoTracking()
@@ -23,6 +24,7 @@ namespace AttarStore.Infrastructure.Repositories.Catalog
 
         public async Task<Product> GetByIdAsync(int id)
             => await _db.Products
+                .Include(p => p.Vendor)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
                 .AsNoTracking()

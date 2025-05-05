@@ -1,9 +1,14 @@
-﻿using AttarStore.Application.Dtos.Catalog;
+﻿// WebApi/Controllers/ProductController.cs
+using AttarStore.Application.Dtos.Catalog;
 using AttarStore.Domain.Entities.Catalog;
 using AttarStore.Domain.Interfaces.Catalog;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace AttarStore.WebApi.Controllers
 {
@@ -14,17 +19,23 @@ namespace AttarStore.WebApi.Controllers
         private readonly IProductRepository _productRepo;
         private readonly IVariantOptionRepository _optionRepo;
         private readonly IProductVariantRepository _variantRepo;
+        private readonly IProductImageRepository _imageRepo;
+        private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
 
         public ProductController(
             IProductRepository productRepo,
             IVariantOptionRepository optionRepo,
             IProductVariantRepository variantRepo,
+            IProductImageRepository imageRepo,
+            IWebHostEnvironment env,
             IMapper mapper)
         {
             _productRepo = productRepo;
             _optionRepo = optionRepo;
             _variantRepo = variantRepo;
+            _imageRepo = imageRepo;
+            _env = env;
             _mapper = mapper;
         }
 
@@ -51,11 +62,16 @@ namespace AttarStore.WebApi.Controllers
         [Authorize(Policy = "Product.Create")]
         public async Task<ActionResult<ProductMapperView>> Create([FromBody] ProductMapperCreate dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            // Map and persist
             var entity = _mapper.Map<Product>(dto);
             await _productRepo.AddAsync(entity);
-            var result = _mapper.Map<ProductMapperView>(entity);
+
+            // Reload with includes for the view
+            var created = await _productRepo.GetByIdAsync(entity.Id);
+            var result = _mapper.Map<ProductMapperView>(created);
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
@@ -64,14 +80,14 @@ namespace AttarStore.WebApi.Controllers
         [Authorize(Policy = "Product.Update")]
         public async Task<IActionResult> Update(int id, [FromBody] ProductMapperUpdate dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var existing = await _productRepo.GetByIdAsync(id);
             if (existing == null) return NotFound();
 
             _mapper.Map(dto, existing);
             await _productRepo.UpdateAsync(existing);
-
             return NoContent();
         }
 
@@ -85,7 +101,6 @@ namespace AttarStore.WebApi.Controllers
             await _productRepo.DeleteAsync(id);
             return NoContent();
         }
-
 
         // ─── Variant‐Attribute Metadata ─────────────────────────────────────────
 
@@ -106,7 +121,6 @@ namespace AttarStore.WebApi.Controllers
             return Ok(_mapper.Map<VariantOptionValueDto[]>(vals));
         }
 
-
         // ─── Product Variants ────────────────────────────────────────────────────
 
         [HttpGet("{productId}/variants")]
@@ -123,19 +137,15 @@ namespace AttarStore.WebApi.Controllers
             int productId,
             [FromBody] ProductVariantCreateDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var variant = _mapper.Map<ProductVariant>(dto);
             variant.ProductId = productId;
-
             await _variantRepo.AddAsync(variant);
-            var view = _mapper.Map<ProductVariantMapperView>(variant);
 
-            return CreatedAtAction(
-                nameof(GetVariants),
-                new { productId },
-                view
-            );
+            var view = _mapper.Map<ProductVariantMapperView>(variant);
+            return CreatedAtAction(nameof(GetVariants), new { productId }, view);
         }
 
         [HttpPut("{productId}/variants/{variantId}")]
@@ -151,7 +161,6 @@ namespace AttarStore.WebApi.Controllers
 
             _mapper.Map(dto, existing);
             await _variantRepo.UpdateAsync(existing);
-
             return NoContent();
         }
 
@@ -165,6 +174,48 @@ namespace AttarStore.WebApi.Controllers
 
             await _variantRepo.DeleteAsync(variantId);
             return NoContent();
+        }
+
+        // ─── Image Upload ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Upload one image for a product
+        /// </summary>
+        [HttpPost("{productId}/images")]
+        [Authorize(Policy = "Product.Update")]
+        public async Task<IActionResult> UploadImage(
+            int productId,
+            [FromForm] ProductImageUploadDto dto)
+        {
+            // 1) ensure product exists
+            var product = await _productRepo.GetByIdAsync(productId);
+            if (product == null) return NotFound();
+
+            // 2) build unique filename
+            var ext = Path.GetExtension(dto.File.FileName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var imagesDir = Path.Combine(_env.WebRootPath, "images");
+            Directory.CreateDirectory(imagesDir);
+            var savePath = Path.Combine(imagesDir, fileName);
+
+            // 3) save file
+            using var stream = System.IO.File.Create(savePath);
+            await dto.File.CopyToAsync(stream);
+
+            // 4) persist URL in DB
+            var img = new ProductImage
+            {
+                ProductId = productId,
+                Url = $"/images/{fileName}"
+            };
+            await _imageRepo.AddAsync(img);
+
+            // 5) return the new record
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = productId },
+                new { img.Id, img.Url }
+            );
         }
     }
 }
