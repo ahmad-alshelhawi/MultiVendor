@@ -155,14 +155,16 @@ namespace AttarStore.Services.Data
                 .HasIndex(oi => new { oi.OrderId, oi.ProductVariantId }).IsUnique();
 
             // ─── Seed: Default Admin ───────────────────────────────────────────────
-            const string adminPasswordHash = "$2a$11$ABCDEFGHijklmnopqrstuvwxyz1234567890";
+
+
+            var adminPassword = BCrypt.Net.BCrypt.HashPassword("password");
             modelBuilder.Entity<Admin>().HasData(new Admin
             {
                 Id = 1,
                 Name = "admin",
                 Email = "ahmad.al.shelhawi@gmail.com",
                 Phone = "096654467",
-                Password = adminPasswordHash,
+                Password = adminPassword,
                 ResetToken = null,
                 ResetTokenExpiry = null,
                 IsDeleted = false

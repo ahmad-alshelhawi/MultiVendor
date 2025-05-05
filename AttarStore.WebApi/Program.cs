@@ -1,4 +1,6 @@
-﻿using AttarStore.Api.Utils;
+﻿using AttarStore.Api.Profiles;
+using AttarStore.Api.Utils;
+using AttarStore.Application.MappingProfiles;
 using AttarStore.Domain.Interfaces;
 using AttarStore.Domain.Interfaces.Catalog;
 using AttarStore.Domain.Interfaces.Shopping;
@@ -18,11 +20,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using IEmailSender = AttarStore.Infrastructure.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,11 +33,9 @@ builder.Services.AddDbContextPool<AppDbContext>(options =>
 
     options
         .UseSqlServer(builder.Configuration.GetConnectionString(connName))
-        // ── IGNORE the “PendingModelChangesWarning” at runtime
+        // IGNORE the “PendingModelChangesWarning” at runtime
         .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
-
-
 
 // ─── Cookie Policy ─────────────────────────────────────────────────────────
 builder.Services.Configure<CookiePolicyOptions>(options =>
@@ -118,12 +115,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Product.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Product.Delete")));
 });
 
-
-
-
-
 // ─── AutoMapper, Repos & Services ───────────────────────────────────────────
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+// ** Scan both the API and Application assemblies for mapping profiles **
+builder.Services.AddAutoMapper(
+    typeof(AdminProfile).Assembly,        // AttarStore.Api.Profiles
+    typeof(ProductProfile).Assembly      // AttarStore.Application.MappingProfiles
+);
 
 // Core repositories
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
@@ -136,9 +133,9 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISubcategoryRepository, SubcategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
+// Shopping repositories
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
 
 // Token & email
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -199,9 +196,3 @@ app.UseAuthorization();
 app.MapControllers();
 app.ApplyMigrations();
 app.Run();
-
-
-
-
-
-
