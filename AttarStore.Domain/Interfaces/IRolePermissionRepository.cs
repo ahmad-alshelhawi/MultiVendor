@@ -9,7 +9,9 @@ namespace AttarStore.Domain.Interfaces
         Task<RolePermission[]> GetByRoleAsync(string roleName);
         Task<RolePermission> GetByIdAsync(int id);
 
-        Task AddAsync(string roleName, int permissionId);
+
+        Task<RolePermission> AddAsync(RolePermission entity);
+
         Task DeleteAsync(int id);
     }
 }

@@ -36,6 +36,25 @@ namespace AttarStore.Application.MappingProfiles
             // ─── Variant mappings ────────────────────────────────────────────
             CreateMap<ProductVariant, ProductVariantMapperView>();
             CreateMap<ProductVariantCreateMapper, ProductVariant>();
+
+
+            // Option & Value
+            CreateMap<VariantOption, VariantOptionDto>();
+            CreateMap<VariantOptionValue, VariantOptionValueDto>();
+
+            // ProductVariant → View
+            CreateMap<ProductVariant, ProductVariantMapperView>()
+                .ForMember(dest => dest.SelectedOptions,
+                           opt => opt.MapFrom(src => src.Attributes.Select(a => a.VariantOptionValue)));
+
+            // Create DTO → ProductVariant + join‐table
+            CreateMap<ProductVariantCreateDto, ProductVariant>()
+                .ForMember(dest => dest.Attributes,
+                    opt => opt.MapFrom(src =>
+                        src.OptionValueIds.Select(valId => new ProductVariantAttribute
+                        {
+                            VariantOptionValueId = valId
+                        })));
         }
     }
 }

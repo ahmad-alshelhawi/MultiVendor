@@ -14,11 +14,8 @@ namespace AttarStore.Domain.Entities.Catalog
 
         public string SKU { get; set; }
         public decimal Price { get; set; }
-        public int Stock { get; set; }
+        public int Quantity { get; set; }
 
-        /// <summary>
-        /// JSON blob or serialized attributes (e.g. size/color).
-        /// </summary>
-        public string AttributesJson { get; set; }
+        public ICollection<ProductVariantAttribute> Attributes { get; set; }
     }
 }

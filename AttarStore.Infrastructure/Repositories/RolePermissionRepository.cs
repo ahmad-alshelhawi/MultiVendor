@@ -1,10 +1,10 @@
-﻿using System;
+﻿using AttarStore.Domain.Entities.Auth;
+using AttarStore.Domain.Interfaces;
+using AttarStore.Services.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AttarStore.Services.Data;
-using AttarStore.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using AttarStore.Domain.Entities.Auth;
 
 namespace AttarStore.Services.Repositories
 {
@@ -30,18 +30,11 @@ namespace AttarStore.Services.Repositories
         public async Task<RolePermission> GetByIdAsync(int id)
             => await _db.RolePermissions.FindAsync(id);
 
-        public async Task AddAsync(string roleName, int permissionId)
+        public async Task<RolePermission> AddAsync(RolePermission entity)
         {
-            if (!await _db.Permissions.AnyAsync(p => p.Id == permissionId))
-                throw new InvalidOperationException("Permission not found.");
-
-            if (await _db.RolePermissions
-                      .AnyAsync(rp => rp.RoleName == roleName && rp.PermissionId == permissionId))
-                throw new InvalidOperationException("This role already has that permission.");
-
-            var rp = new RolePermission { RoleName = roleName, PermissionId = permissionId };
-            _db.RolePermissions.Add(rp);
+            _db.RolePermissions.Add(entity);
             await _db.SaveChangesAsync();
+            return entity;
         }
 
         public async Task DeleteAsync(int id)

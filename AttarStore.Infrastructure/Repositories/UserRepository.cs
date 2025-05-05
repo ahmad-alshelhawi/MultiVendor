@@ -1,11 +1,11 @@
-﻿using System;
+﻿using AttarStore.Domain.Entities;
+using AttarStore.Domain.Entities.submodels;
+using AttarStore.Domain.Interfaces;
+using AttarStore.Services.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AttarStore.Domain.Entities;
-using AttarStore.Services.Data;
-using AttarStore.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using AttarStore.Domain.Entities.submodels;
 
 namespace AttarStore.Services.Repositories
 {
@@ -120,6 +120,13 @@ namespace AttarStore.Services.Repositories
 
             if (await ExistsByNameOrEmailAsync(user.Name, user.Email))
                 throw new InvalidOperationException("Name or email already exists.");
+            // If VendorId provided, ensure the vendor exists
+            if (user.VendorId.HasValue)
+            {
+                bool exists = await _db.Vendors.AnyAsync(v => v.Id == user.VendorId.Value);
+                if (!exists)
+                    throw new InvalidOperationException($"Vendor {user.VendorId} not found.");
+            }
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
@@ -251,5 +258,11 @@ namespace AttarStore.Services.Repositories
             await _db.SaveChangesAsync();
             return true;
         }
+
+        public async Task<User[]> GetByVendorIdAsync(int vendorId)
+            => await _db.Users
+                .AsNoTracking()
+                .Where(u => !u.IsDeleted && u.VendorId == vendorId)
+                .ToArrayAsync();
     }
 }

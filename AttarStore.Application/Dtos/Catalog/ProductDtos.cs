@@ -51,7 +51,10 @@ namespace AttarStore.Application.Dtos.Catalog
         public string SKU { get; set; }
         public decimal Price { get; set; }
         public int Stock { get; set; }
-        public string AttributesJson { get; set; }
+        /*        public string AttributesJson { get; set; }
+        */
+        public IList<VariantOptionValueDto> SelectedOptions { get; set; }
+
     }
 
     // ─── Variant Create ──────────────────────────────────────────────────────
@@ -62,4 +65,26 @@ namespace AttarStore.Application.Dtos.Catalog
         [Required] public int Stock { get; set; }
         public string AttributesJson { get; set; }
     }
+
+    public class VariantOptionDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class VariantOptionValueDto
+    {
+        public int Id { get; set; }
+        public int OptionId { get; set; }
+        public string Value { get; set; }
+    }
+    public class ProductVariantCreateDto
+    {
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public IList<int> OptionValueIds { get; set; }
+    }
+
+
 }

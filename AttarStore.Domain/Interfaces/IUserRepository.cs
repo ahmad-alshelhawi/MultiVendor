@@ -53,5 +53,10 @@ namespace AttarStore.Domain.Interfaces
         // Password reset flow
         Task<string> GenerateResetTokenAsync(string email);
         Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
+
+        /// <summary>
+        /// List all users belonging to the given vendor.
+        /// </summary>
+        Task<User[]> GetByVendorIdAsync(int vendorId);
     }
 }

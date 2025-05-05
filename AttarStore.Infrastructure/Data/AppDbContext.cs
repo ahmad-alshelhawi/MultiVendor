@@ -26,6 +26,10 @@ namespace AttarStore.Services.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<VariantOption> VariantOptions { get; set; }
+        public DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+        public DbSet<ProductVariantAttribute> ProductVariantAttributes { get; set; }
+
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -154,6 +158,40 @@ namespace AttarStore.Services.Data
             modelBuilder.Entity<OrderItem>()
                 .HasIndex(oi => new { oi.OrderId, oi.ProductVariantId }).IsUnique();
 
+
+
+            // ─── VariantOption → VariantOptionValue ─────────────────────────────
+            modelBuilder.Entity<VariantOption>()
+                .HasMany(o => o.Values)
+                .WithOne(v => v.VariantOption!)
+                .HasForeignKey(v => v.VariantOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ─── ProductVariant ↔ ProductVariantAttribute ────────────────────────
+            modelBuilder.Entity<ProductVariantAttribute>()
+            .HasKey(pa => new { pa.ProductVariantId, pa.VariantOptionId, pa.VariantOptionValueId });
+
+            modelBuilder.Entity<ProductVariantAttribute>()
+              .HasOne(pa => pa.ProductVariant)
+              .WithMany(pv => pv.Attributes)
+              .HasForeignKey(pa => pa.ProductVariantId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProductVariantAttribute>()
+              .HasOne(pa => pa.VariantOption)
+              .WithMany()
+              .HasForeignKey(pa => pa.VariantOptionId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProductVariantAttribute>()
+              .HasOne(pa => pa.VariantOptionValue)
+              .WithMany()
+              .HasForeignKey(pa => pa.VariantOptionValueId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+
+
+
             // ─── Seed: Default Admin ───────────────────────────────────────────────
 
 
@@ -184,7 +222,13 @@ namespace AttarStore.Services.Data
                 new Permission { Id = 10, Name = "Order.ReadAll", Description = "View all orders (admins)" },
                 new Permission { Id = 11, Name = "Order.ReadOwn", Description = "View own orders" },
                 new Permission { Id = 12, Name = "Order.Update", Description = "Update orders" },
-                new Permission { Id = 13, Name = "Order.Delete", Description = "Cancel orders" }
+                new Permission { Id = 13, Name = "Order.Delete", Description = "Cancel orders" },
+                  // ─── Permission‐management perms
+                  new Permission { Id = 14, Name = "Permission.Create", Description = "Manage permissions" },
+                  new Permission { Id = 15, Name = "Permission.Read", Description = "View permissions" },
+                  new Permission { Id = 16, Name = "Permission.Update", Description = "Edit permissions" },
+                  new Permission { Id = 17, Name = "Permission.Delete", Description = "Remove permissions" }
+
             );
 
             // ─── Seed: RolePermissions ─────────────────────────────────────────────
@@ -213,10 +257,15 @@ namespace AttarStore.Services.Data
                 new RolePermission { Id = 22, RoleName = Roles.VendorAdmin, PermissionId = 11 },
                 new RolePermission { Id = 23, RoleName = Roles.VendorUser, PermissionId = 6 },
                 new RolePermission { Id = 24, RoleName = Roles.VendorUser, PermissionId = 7 },
-                new RolePermission { Id = 28, RoleName = Roles.VendorUser, PermissionId = 5 },
-                new RolePermission { Id = 25, RoleName = Roles.Client, PermissionId = 6 },
-                new RolePermission { Id = 26, RoleName = Roles.Client, PermissionId = 9 },
-                new RolePermission { Id = 27, RoleName = Roles.Client, PermissionId = 11 }
+                new RolePermission { Id = 25, RoleName = Roles.VendorUser, PermissionId = 5 },
+                new RolePermission { Id = 26, RoleName = Roles.Client, PermissionId = 6 },
+                new RolePermission { Id = 27, RoleName = Roles.Client, PermissionId = 9 },
+                new RolePermission { Id = 28, RoleName = Roles.Client, PermissionId = 11 },
+  // ─── Admin can now manage the permission entities:
+  new RolePermission { Id = 29, RoleName = Roles.Admin, PermissionId = 14 },
+  new RolePermission { Id = 30, RoleName = Roles.Admin, PermissionId = 15 },
+  new RolePermission { Id = 31, RoleName = Roles.Admin, PermissionId = 16 },
+  new RolePermission { Id = 32, RoleName = Roles.Admin, PermissionId = 17 }
             );
         }
     }

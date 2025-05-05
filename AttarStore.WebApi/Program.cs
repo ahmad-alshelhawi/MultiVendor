@@ -113,7 +113,18 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Product.Read", policy => policy.Requirements.Add(new PermissionRequirement("Product.Read")));
     options.AddPolicy("Product.Update", policy => policy.Requirements.Add(new PermissionRequirement("Product.Update")));
     options.AddPolicy("Product.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Product.Delete")));
+
+    // ─── NEW Permission‐management policies ───────────────────────────────────
+    options.AddPolicy("Permission.Read", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Read")));
+    options.AddPolicy("Permission.Update", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Update")));
+    options.AddPolicy("Permission.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Permission.Delete")));
+
+    // Users-Vendors
+    options.AddPolicy("VendorUser.Read", policy => policy.Requirements.Add(new PermissionRequirement("User.ReadOwn")));
+    options.AddPolicy("VendorUser.Create", policy => policy.Requirements.Add(new PermissionRequirement("User.Create")));
+
 });
+
 
 // ─── AutoMapper, Repos & Services ───────────────────────────────────────────
 // ** Scan both the API and Application assemblies for mapping profiles **
@@ -132,6 +143,8 @@ builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISubcategoryRepository, SubcategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IVariantOptionRepository, VariantOptionRepository>();
+builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 
 // Shopping repositories
 builder.Services.AddScoped<ICartRepository, CartRepository>();
@@ -145,6 +158,9 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Permission management
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+
+
+
 
 // ─── Controllers & Swagger ─────────────────────────────────────────────────
 builder.Services.AddControllers();

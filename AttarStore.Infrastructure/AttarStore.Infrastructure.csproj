@@ -7,10 +7,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-		<PackageReference Include="Castle.Core"      Version="5.2.1" />
+		<PackageReference Include="Castle.Core" Version="5.2.1" />
 
 		<!-- EF Core 9.x (align all packages) -->
-		<PackageReference Include="Microsoft.EntityFrameworkCore"       Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
 			<PrivateAssets>all</PrivateAssets>
@@ -23,10 +23,15 @@
 
 		<!-- Configuration packages aligned to 9.x -->
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder"       Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4" />
+  <PackageReference Include="Microsoft.Extensions.Configuration.Json"           Version="9.0.4" />
+		
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
 
 		<!-- JWT support (these can remain at 8.x) -->
-		<PackageReference Include="Microsoft.IdentityModel.Tokens"  Version="8.9.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.9.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
 	</ItemGroup>
 
