@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using AttarStore.Api.Utils;
+﻿using AttarStore.Api.Utils;
 using AttarStore.Domain.Interfaces;
 using AttarStore.Domain.Interfaces.Catalog;
 using AttarStore.Domain.Interfaces.Shopping;
@@ -20,8 +15,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 using IEmailSender = AttarStore.Infrastructure.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,8 +30,12 @@ var builder = WebApplication.CreateBuilder(args);
 // ─── EF Core DbContext ─────────────────────────────────────────────────────
 builder.Services.AddDbContextPool<AppDbContext>(options =>
 {
-    var connName = builder.Environment.IsDevelopment() ? "dev" : "main";
-    options.UseSqlServer(builder.Configuration.GetConnectionString(connName));
+    var connName = builder.Environment.IsDevelopment() ? "Dev" : "Main";
+
+    options
+        .UseSqlServer(builder.Configuration.GetConnectionString(connName))
+        // ── IGNORE the “PendingModelChangesWarning” at runtime
+        .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
 
 
