@@ -155,6 +155,11 @@ builder.Services.AddAuthorization(options =>
     // If you want to distinguish admin-employees:
     options.AddPolicy("AdminUser.Read", policy => policy.Requirements.Add(new PermissionRequirement("User.ReadOwn")));
     options.AddPolicy("AdminUser.Create", policy => policy.Requirements.Add(new PermissionRequirement("User.Create")));
+    // Vendor
+    options.AddPolicy("Vendor.Create", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Create")));
+    options.AddPolicy("Vendor.Read", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Read")));
+    options.AddPolicy("Vendor.Update", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Update")));
+    options.AddPolicy("Vendor.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Delete")));
 
 });
 
@@ -189,7 +194,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
-
+builder.Services.AddScoped<IVendorService, VendorService>();
 // Permission management
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();

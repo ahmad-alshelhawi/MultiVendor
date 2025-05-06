@@ -9,6 +9,7 @@ namespace AttarStore.Domain.Interfaces.Catalog
 {
     public interface IProductImageRepository
     {
-        Task<ProductImage> AddAsync(ProductImage image);
+        Task AddAsync(ProductImage image);
+        Task DeleteAsync(int imageId);
     }
 }

@@ -4,6 +4,7 @@ using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250506101211_SeedVendorPermissions")]
+    partial class SeedVendorPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 6, 11, 3, 25, 264, DateTimeKind.Unspecified).AddTicks(3398), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 6, 10, 12, 11, 213, DateTimeKind.Unspecified).AddTicks(210), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$PEYr/YUvO.GhS.WocLaTSOH2FtpxL2li7qJl9BX53bTcr2GShg5L6",
+                            Password = "$2a$11$rhzl5keENgr.Iv5U8QevRuWwF2a2aqmPyD8TiuB84Hpsn3g0szoVC",
                             Phone = "096654467",
                             Role = "Admin"
                         });
@@ -243,19 +246,19 @@ namespace AttarStore.Infrastructure.Migrations
                         new
                         {
                             Id = 22,
-                            Description = "Admin add new user assigned to a vendor",
+                            Description = "Admin Add new user assigined to a Vendor",
                             Name = "VendorUser.Create"
                         },
                         new
                         {
                             Id = 23,
-                            Description = "Admin reads users of a specific vendor",
+                            Description = "Admin reads users belong to a spicefic Vendor",
                             Name = "VendorUser.Read"
                         },
                         new
                         {
                             Id = 24,
-                            Description = "Admin updates vendor’s user",
+                            Description = "Admin update User Belong to a Vendor",
                             Name = "VendorUser.Update"
                         },
                         new
@@ -568,36 +571,54 @@ namespace AttarStore.Infrastructure.Migrations
                         new
                         {
                             Id = 37,
-                            PermissionId = 40,
+                            PermissionId = 22,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 38,
-                            PermissionId = 41,
+                            PermissionId = 23,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 39,
-                            PermissionId = 42,
+                            PermissionId = 24,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 40,
-                            PermissionId = 43,
+                            PermissionId = 40,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 41,
                             PermissionId = 41,
-                            RoleName = "VendorAdmin"
+                            RoleName = "Admin"
                         },
                         new
                         {
                             Id = 42,
+                            PermissionId = 42,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 43,
+                            PermissionId = 43,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 44,
+                            PermissionId = 41,
+                            RoleName = "VendorAdmin"
+                        },
+                        new
+                        {
+                            Id = 45,
                             PermissionId = 42,
                             RoleName = "VendorAdmin"
                         });

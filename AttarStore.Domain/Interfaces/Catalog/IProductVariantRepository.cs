@@ -11,7 +11,7 @@ namespace AttarStore.Domain.Interfaces.Catalog
     {
         Task<IEnumerable<ProductVariant>> GetByProductIdAsync(int productId);
         Task<ProductVariant> GetByIdAsync(int variantId);
-        Task<ProductVariant> AddAsync(ProductVariant variant);
+        Task AddAsync(ProductVariant variant);
         Task UpdateAsync(ProductVariant variant);
         Task DeleteAsync(int variantId);
     }

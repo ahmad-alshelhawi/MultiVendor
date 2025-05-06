@@ -4,6 +4,7 @@ using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250506094443_InventoryTransactionCascadeFix")]
+    partial class InventoryTransactionCascadeFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 6, 11, 3, 25, 264, DateTimeKind.Unspecified).AddTicks(3398), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 6, 9, 44, 42, 471, DateTimeKind.Unspecified).AddTicks(4478), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$PEYr/YUvO.GhS.WocLaTSOH2FtpxL2li7qJl9BX53bTcr2GShg5L6",
+                            Password = "$2a$11$bMTRPyh4EhIa/qRr9l.hpebiO68lQDm7JvQnCORcLKVytzIwJAW1e",
                             Phone = "096654467",
                             Role = "Admin"
                         });
@@ -243,44 +246,20 @@ namespace AttarStore.Infrastructure.Migrations
                         new
                         {
                             Id = 22,
-                            Description = "Admin add new user assigned to a vendor",
+                            Description = "Admin Add new user assigined to a Vendor",
                             Name = "VendorUser.Create"
                         },
                         new
                         {
                             Id = 23,
-                            Description = "Admin reads users of a specific vendor",
+                            Description = "Admin reads users belong to a spicefic Vendor",
                             Name = "VendorUser.Read"
                         },
                         new
                         {
                             Id = 24,
-                            Description = "Admin updates vendor’s user",
+                            Description = "Admin update User Belong to a Vendor",
                             Name = "VendorUser.Update"
-                        },
-                        new
-                        {
-                            Id = 40,
-                            Description = "Create vendors",
-                            Name = "Vendor.Create"
-                        },
-                        new
-                        {
-                            Id = 41,
-                            Description = "View vendors",
-                            Name = "Vendor.Read"
-                        },
-                        new
-                        {
-                            Id = 42,
-                            Description = "Edit vendors",
-                            Name = "Vendor.Update"
-                        },
-                        new
-                        {
-                            Id = 43,
-                            Description = "Delete vendors",
-                            Name = "Vendor.Delete"
                         });
                 });
 
@@ -568,38 +547,20 @@ namespace AttarStore.Infrastructure.Migrations
                         new
                         {
                             Id = 37,
-                            PermissionId = 40,
+                            PermissionId = 22,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 38,
-                            PermissionId = 41,
+                            PermissionId = 23,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 39,
-                            PermissionId = 42,
+                            PermissionId = 24,
                             RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 40,
-                            PermissionId = 43,
-                            RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 41,
-                            PermissionId = 41,
-                            RoleName = "VendorAdmin"
-                        },
-                        new
-                        {
-                            Id = 42,
-                            PermissionId = 42,
-                            RoleName = "VendorAdmin"
                         });
                 });
 
@@ -1084,9 +1045,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");

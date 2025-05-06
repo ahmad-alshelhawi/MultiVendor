@@ -1,4 +1,5 @@
 ﻿using AttarStore.Domain.Entities.Auth;
+using AttarStore.Domain.Entities.Shopping;
 using AttarStore.Domain.Entities.submodels;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace AttarStore.Domain.Entities
         public Admin? Admin { get; set; }
 
         // Account state
+        public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
@@ -38,5 +40,10 @@ namespace AttarStore.Domain.Entities
         // ─── NEW: per-user permission overrides
         public ICollection<UserPermission> UserPermissions { get; set; }
             = new List<UserPermission>();
+
+        public ICollection<InventoryTransaction> InventoryTransactions { get; set; }
+      = new List<InventoryTransaction>();
+
+
     }
 }

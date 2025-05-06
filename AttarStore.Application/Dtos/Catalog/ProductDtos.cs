@@ -1,14 +1,38 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿// AttarStore.Application.Dtos.Catalog/ProductDtos.cs
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AttarStore.Application.Dtos.Catalog
 {
-    // ─── Product View ────────────────────────────────────────────────────────
+    // ─── Create DTO ────────────────────────────────────────────────────────────
+    public class ProductMapperCreate
+    {
+        [Required] public string Name { get; set; }
+        public string Description { get; set; }
+        public string Details { get; set; }
+        public int? SubcategoryId { get; set; }
+
+        // if you want the product itself (no variants) to carry stock & price:
+        public decimal? DefaultPrice { get; set; }
+        public int? DefaultStock { get; set; }
+
+        public List<ProductVariantCreateDto> Variants { get; set; }
+    }
+
+    // ─── Update DTO ────────────────────────────────────────────────────────────
+    public class ProductMapperUpdate
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Details { get; set; }
+        public int? SubcategoryId { get; set; }
+        public decimal? DefaultPrice { get; set; }
+        public int? DefaultStock { get; set; }
+
+        public List<ProductVariantUpdateDto> Variants { get; set; }
+    }
+
+    // ─── View DTO ──────────────────────────────────────────────────────────────
     public class ProductMapperView
     {
         public int Id { get; set; }
@@ -16,102 +40,70 @@ namespace AttarStore.Application.Dtos.Catalog
         public string Description { get; set; }
         public string Details { get; set; }
         public int? SubcategoryId { get; set; }
-        public string? Subcategory { get; set; }
-        public int VendorId { get; set; }
+        public string Subcategory { get; set; }
+        public int? VendorId { get; set; }
         public string VendorName { get; set; }
-        public List<string> ImageUrls { get; set; }
+
+        public decimal? DefaultPrice { get; set; }
+        public int? DefaultStock { get; set; }
+
         public List<ProductVariantMapperView> Variants { get; set; }
     }
 
-    // ─── Product Create ──────────────────────────────────────────────────────
-    public class ProductMapperCreate
+    // ─── Variant “create” DTO ─────────────────────────────────────────────────
+    public class ProductVariantCreateDto
     {
-        [Required]
-        public string Name { get; set; }
-
-        public string Description { get; set; }
-        public string Details { get; set; }
-        public int? SubcategoryId { get; set; }
-        [Required] public int VendorId { get; set; }
-
-        // ← Add this:
-        /// <summary>
-        /// One or more variants for this product (price, SKU, stock, attributes…)
-        /// </summary>
-        public List<ProductVariantCreateDto>? Variants { get; set; }
-            = new List<ProductVariantCreateDto>();
+        [Required] public string Sku { get; set; }
+        [Required] public decimal Price { get; set; }
+        [Required] public int Stock { get; set; }
+        public List<VariantAttributeCreateDto> Attributes { get; set; }
     }
 
-    // ─── Product Update ──────────────────────────────────────────────────────
-    public class ProductMapperUpdate
+    // ─── Variant “update” DTO ─────────────────────────────────────────────────
+    public class ProductVariantUpdateDto : ProductVariantCreateDto
     {
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-        public string? Details { get; set; }
-        public int? SubcategoryId { get; set; }
+        [Required] public int Id { get; set; }
     }
-    // ─── Variant View ────────────────────────────────────────────────────────
+
+    // ─── Variant view DTO ─────────────────────────────────────────────────────
     public class ProductVariantMapperView
     {
         public int Id { get; set; }
         public string Sku { get; set; }
         public decimal Price { get; set; }
-
         public int Stock { get; set; }
 
         public List<VariantAttributeViewDto> Attributes { get; set; }
     }
 
-    // ─── Variant Create ──────────────────────────────────────────────────────
-    public class ProductVariantCreateMapper
+    // ─── Attribute create DTO ─────────────────────────────────────────────────
+    public class VariantAttributeCreateDto
     {
-        [Required] public string SKU { get; set; }
-        [Required] public decimal Price { get; set; }
-        [Required] public int Stock { get; set; }
-        public string AttributesJson { get; set; }
+        [Required] public int OptionId { get; set; }
+        [Required] public int ValueId { get; set; }
     }
 
+    // ─── Attribute view DTO ──────────────────────────────────────────────────
+    public class VariantAttributeViewDto
+    {
+        public int OptionId { get; set; }
+        public string OptionName { get; set; }
+        public int ValueId { get; set; }
+        public string ValueName { get; set; }
+    }
+
+    // ─── Option & Value metadata DTOs ─────────────────────────────────────────
     public class VariantOptionDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
     }
 
     public class VariantOptionValueDto
     {
         public int Id { get; set; }
+        public int OptionId { get; set; }
         public string Value { get; set; }
     }
-    public class ProductVariantCreateDto
-    {
-        [Required]
-        public string SKU { get; set; }
-
-        [Required]
-        public decimal Price { get; set; }
-
-        public int Stock { get; set; }
-
-        /// <summary>
-        /// One or more option/value pairs, e.g. Size=Large, Color=Blue
-        /// </summary>
-        public List<VariantAttributeDto>? Attributes { get; set; }
-            = new List<VariantAttributeDto>();
-    }
-
-    public class ProductImageUploadDto
-    {
-        [Required] public IFormFile File { get; set; }
-    }
-    public class VariantOptionCreateDto
-    {
-        [Required] public string Name { get; set; }
-    }
-
-    public class VariantOptionValueCreateDto
-    {
-        [Required] public int OptionId { get; set; }
-        [Required] public string Value { get; set; }
-    }
-
 }

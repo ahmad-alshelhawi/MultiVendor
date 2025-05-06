@@ -1,13 +1,12 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using AttarStore.Application.Dtos;
+﻿using AttarStore.Application.Dtos;
 using AttarStore.Domain.Entities;
 using AttarStore.Domain.Entities.Auth;
 using AttarStore.Domain.Interfaces;
-
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AttarStore.WebApi.Controllers
 {
@@ -15,6 +14,7 @@ namespace AttarStore.WebApi.Controllers
     [ApiController]
     public class VendorController : ControllerBase
     {
+        private readonly IVendorService _vendorService;
         private readonly IVendorRepository _vendorRepo;
         private readonly IUserRepository _userRepo;
         private readonly IMapper _mapper;
@@ -22,11 +22,13 @@ namespace AttarStore.WebApi.Controllers
         public VendorController(
             IVendorRepository vendorRepository,
             IUserRepository userRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IVendorService vendorService)
         {
             _vendorRepo = vendorRepository;
             _userRepo = userRepository;
             _mapper = mapper;
+            _vendorService = vendorService;
         }
 
         // ─── Admin‐only management ────────────────────────────────────────────
@@ -166,6 +168,24 @@ namespace AttarStore.WebApi.Controllers
             await _vendorRepo.UpdateAsync(existing);
 
             return Ok(new { status = "Profile updated successfully." });
+        }
+
+
+
+        [HttpPost("{id}/suspend")]
+        [Authorize(Policy = "Vendor.Update")]
+        public async Task<IActionResult> Suspend(int id)
+        {
+            await _vendorService.SuspendVendorAsync(id);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/activate")]
+        [Authorize(Policy = "Vendor.Update")]
+        public async Task<IActionResult> Activate(int id)
+        {
+            await _vendorService.ActivateVendorAsync(id);
+            return NoContent();
         }
     }
 }
