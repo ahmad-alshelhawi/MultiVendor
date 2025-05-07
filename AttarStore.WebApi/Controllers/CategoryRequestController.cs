@@ -1,56 +1,114 @@
 ﻿using AttarStore.Application.Dtos.Catalog;
 using AttarStore.Domain.Entities.Catalog;
 using AttarStore.Domain.Interfaces.Catalog;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace AttarStore.WebApi.Controllers
 {
-    [Route("api/category-requests")]
     [ApiController]
-    public class CategoryRequestsController : ControllerBase
+    [Route("api/[controller]")]
+    public class CategoryRequestController : ControllerBase
     {
         private readonly ICategoryRequestRepository _repo;
-        public CategoryRequestsController(ICategoryRequestRepository repo) => _repo = repo;
+        private readonly IMapper _mapper;
 
-        // Vendor submits a new request
-        [HttpPost]
-        [Authorize(Roles = "VendorAdmin")]
-        [Authorize(Policy = "CategoryRequest.Create")]
-        public async Task<IActionResult> Post([FromBody] CategoryRequestCreateDto dto)
+        public CategoryRequestController(
+            ICategoryRequestRepository repo,
+            IMapper mapper)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var req = new CategoryRequest
-            {
-                VendorId = userId,
-                Name = dto.Name,
-                Description = dto.Description
-            };
-            var created = await _repo.CreateAsync(req);
-            return CreatedAtAction(null, new { id = created.Id }, created);
+            _repo = repo;
+            _mapper = mapper;
         }
 
-        // Vendor views own requests
-        [HttpGet("mine")]
-        [Authorize(Roles = "VendorAdmin")]
+        [HttpPost]
+        [Authorize(Policy = "CategoryRequest.Create")]
+        public async Task<ActionResult<CategoryRequestDto>> Create([FromBody] CategoryRequestCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var vendorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(vendorIdClaim, out var vendorId))
+                return Unauthorized();
+
+            var entity = _mapper.Map<CategoryRequest>(dto);
+            entity.VendorId = vendorId;
+
+            // This returns void, so just await it
+            await _repo.AddAsync(entity);
+
+            // The entity now has an ID (EF will have set it)
+            var result = _mapper.Map<CategoryRequestDto>(entity);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+
+        /// <summary>
+        /// Vendor reads their own requests
+        /// </summary>
+        [HttpGet("my")]
         [Authorize(Policy = "CategoryRequest.ReadOwn")]
-        public async Task<IActionResult> Mine()
-          => Ok(await _repo.GetByVendorAsync(int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)));
+        public async Task<ActionResult<CategoryRequestDto[]>> GetMine()
+        {
+            var vendorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(vendorIdClaim, out var vendorId))
+                return Unauthorized();
 
-        // Admin views & approves
-        [HttpGet("pending")]
-        [Authorize(Roles = "Admin")]
+            var list = await _repo.GetByVendorAsync(vendorId);
+            return Ok(_mapper.Map<CategoryRequestDto[]>(list));
+        }
+
+        /// <summary>
+        /// Admin reads all requests
+        /// </summary>
+        [HttpGet]
         [Authorize(Policy = "CategoryRequest.ReadAll")]
-        public async Task<IActionResult> Pending()
-          => Ok(await _repo.GetAllPendingAsync());
+        public async Task<ActionResult<CategoryRequestDto[]>> GetAll()
+        {
+            var list = await _repo.GetAllAsync();
+            return Ok(_mapper.Map<CategoryRequestDto[]>(list));
+        }
 
-        [HttpPut("{id}/status")]
-        [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Get a single request by ID (vendor or admin)
+        /// </summary>
+        [HttpGet("{id}")]
+        [Authorize(Policy = "CategoryRequest.ReadOwn")]            // same policy works for admin too
+        public async Task<ActionResult<CategoryRequestDto>> GetById(int id)
+        {
+            var item = await _repo.GetByIdAsync(id);
+            if (item == null)
+                return NotFound();
+
+            // if vendor, ensure ownership
+            if (User.IsInRole("Vendor") && item.VendorId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                return Forbid();
+
+            return Ok(_mapper.Map<CategoryRequestDto>(item));
+        }
+
+        /// <summary>
+        /// Admin approves or rejects a request
+        /// </summary>
+        [HttpPut("{id}")]
         [Authorize(Policy = "CategoryRequest.Update")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] CategoryRequestUpdateStatusDto dto)
-          => Ok(await _repo.UpdateStatusAsync(id, dto.Status));
-    }
+        public async Task<IActionResult> UpdateStatus(
+            int id,
+            [FromBody] CategoryRequestUpdateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var existing = await _repo.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            _mapper.Map(dto, existing);
+            await _repo.UpdateAsync(existing);
+            return NoContent();
+        }
+    }
 }

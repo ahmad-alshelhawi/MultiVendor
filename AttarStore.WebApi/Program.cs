@@ -161,15 +161,27 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Vendor.Update", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Update")));
     options.AddPolicy("Vendor.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Delete")));
 
-});
+
+        options.AddPolicy("CategoryRequest.Create", policy =>
+            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Create")));
+        options.AddPolicy("CategoryRequest.ReadOwn", policy =>
+            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadOwn")));
+        options.AddPolicy("CategoryRequest.ReadAll", policy =>
+            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadAll")));
+        options.AddPolicy("CategoryRequest.Update", policy =>
+            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Update")));
+    });
+
 
 
 // ─── AutoMapper, Repos & Services ───────────────────────────────────────────
 // ** Scan both the API and Application assemblies for mapping profiles **
 builder.Services.AddAutoMapper(
-    typeof(AdminProfile).Assembly,        // AttarStore.Api.Profiles
-    typeof(ProductProfile).Assembly      // AttarStore.Application.MappingProfiles
+    typeof(AdminProfile).Assembly,
+    typeof(ProductProfile).Assembly,
+    typeof(CategoryRequestProfile).Assembly
 );
+
 
 // Core repositories
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
@@ -185,6 +197,7 @@ builder.Services.AddScoped<IVariantOptionRepository, VariantOptionRepository>();
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IProductVariantImageRepository, ProductVariantImageRepository>();
+builder.Services.AddScoped<ICategoryRequestRepository, CategoryRequestRepository>();
 
 // Shopping repositories
 builder.Services.AddScoped<ICartRepository, CartRepository>();
