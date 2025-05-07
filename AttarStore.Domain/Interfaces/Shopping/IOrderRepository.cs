@@ -9,12 +9,12 @@ namespace AttarStore.Domain.Interfaces.Shopping
 {
     public interface IOrderRepository
     {
-        Task<Order[]> GetAllAsync();
-        Task<Order[]> GetByClientAsync(int clientId);
         Task<Order> GetByIdAsync(int id);
-
+        Task<Order[]> GetAllForClientAsync(int clientId);
         Task<Order> CreateAsync(Order order);
-        Task<Order> UpdateStatusAsync(int orderId, string status);
-        Task DeleteAsync(int id);
+
+        // ← new:
+        Task<Order> CheckoutAsync(int clientId);
     }
+
 }

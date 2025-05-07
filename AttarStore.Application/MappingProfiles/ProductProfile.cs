@@ -16,7 +16,9 @@ namespace AttarStore.Application.MappingProfiles
                 .ForMember(d => d.DefaultStock, o => o.MapFrom(src => src.DefaultStock))
                 .ForMember(d => d.Subcategory, o => o.MapFrom(src => src.Subcategory != null ? src.Subcategory.Name : null))
                 .ForMember(d => d.VendorName, o => o.MapFrom(src => src.Vendor != null ? src.Vendor.Name : null))
-                .ForMember(d => d.Variants, o => o.MapFrom(src => src.Variants));
+                .ForMember(d => d.Variants, o => o.MapFrom(src => src.Variants))
+            .ForMember(d => d.ImageUrls, o => o.MapFrom(src => src.Images.Select(i => i.Url)));
+
 
             // ─── Create DTO → Product ────────────────────────────────────
             CreateMap<ProductMapperCreate, Product>()
@@ -31,17 +33,24 @@ namespace AttarStore.Application.MappingProfiles
 
             // ─── Variant → View DTO ──────────────────────────────────────
             CreateMap<ProductVariant, ProductVariantMapperView>()
-                .ForMember(d => d.Attributes, o => o.MapFrom(src => src.Attributes));
+                .ForMember(d => d.Attributes, o => o.MapFrom(src => src.Attributes))
+                .ForMember(d => d.ImageUrls, o => o.MapFrom(src => src.Images.Select(i => i.Url)));
+
 
             // ─── Variant Create DTO → Variant ────────────────────────────
             CreateMap<ProductVariantCreateDto, ProductVariant>()
-                .ForMember(d => d.Id, o => o.Ignore())
-                .ForMember(d => d.Images, o => o.Ignore()) // handle via separate image endpoints
-                .ForMember(d => d.Attributes, o => o.MapFrom(src => src.Attributes));
+                    // null or zero → we’ll back-fill defaults in repo
+                    .ForMember(d => d.Price, o => o.MapFrom(src => src.Price ?? 0M))
+                    .ForMember(d => d.Stock, o => o.MapFrom(src => src.Stock ?? 0))
+                    .ForMember(d => d.Images,
+                    o => o.MapFrom(src => src.ImageUrls.Select(u => new ProductVariantImage { Url = u })))
+                                .ForMember(d => d.Attributes,
+                    o => o.MapFrom(src => src.Attributes));
 
             // ─── Variant Update DTO → Variant ────────────────────────────
             CreateMap<ProductVariantUpdateDto, ProductVariant>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
 
             // ─── Attribute entity → View DTO ─────────────────────────────
             CreateMap<ProductVariantAttribute, VariantAttributeViewDto>()

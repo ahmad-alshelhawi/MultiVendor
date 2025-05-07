@@ -10,7 +10,8 @@ namespace AttarStore.Domain.Entities.Catalog
     {
         public int Id { get; set; }
         public int VariantOptionId { get; set; }
-        public VariantOption VariantOption { get; set; }
-        public string Value { get; set; }
+        public VariantOption? VariantOption { get; set; }
+
+        public string Value { get; set; } = "";
     }
 }

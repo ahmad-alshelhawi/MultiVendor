@@ -13,27 +13,11 @@ namespace AttarStore.Application.MappingProfiles
     {
         public OrderProfile()
         {
-            // ─── Order → View
-            CreateMap<Order, OrderView>()
-                .ForMember(dest => dest.Items,
-                           opt => opt.MapFrom(src => src.Items));
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(d => d.VariantSku,
+                           o => o.MapFrom(src => src.ProductVariant.Sku));
 
-            CreateMap<OrderItem, OrderItemView>();
-
-            // ─── Create DTO → Order
-            CreateMap<OrderCreate, Order>()
-                .ForMember(dest => dest.Items,
-                           opt => opt.MapFrom(src =>
-                               src.Items.ConvertAll(i => new OrderItem
-                               {
-                                   ProductVariantId = i.ProductVariantId,
-                                   Quantity = i.Quantity
-                               })));
-
-            // ─── Status‐Update DTO → Order
-            CreateMap<OrderStatusUpdate, Order>()
-                .ForMember(dest => dest.Status,
-                           opt => opt.MapFrom(src => src.Status));
+            CreateMap<Order, OrderDto>();
         }
     }
 

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using AttarStore.Domain.Entities;
+using System;
 using System.Collections.Generic;
-using AttarStore.Domain.Entities;
 
 namespace AttarStore.Domain.Entities.Shopping
 {
@@ -9,11 +9,12 @@ namespace AttarStore.Domain.Entities.Shopping
         public int Id { get; set; }
         public int ClientId { get; set; }
         public Client Client { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        // ── UPDATED: remove dynamic initializer
-        public DateTimeOffset CreatedAt { get; set; }
-
+        // ← add this:
         public string Status { get; set; } = "Pending";
-        public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+
+        public ICollection<OrderItem> Items { get; set; }
+            = new List<OrderItem>();
     }
 }

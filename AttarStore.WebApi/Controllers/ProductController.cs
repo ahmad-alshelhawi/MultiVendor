@@ -16,19 +16,29 @@ namespace AttarStore.WebApi.Controllers
     {
         private readonly IProductRepository _productRepo;
         private readonly IVariantOptionRepository _optRepo;
+        private readonly IProductImageRepository _imgRepo;
+        private readonly IProductVariantImageRepository _varImgRepo;
         private readonly IProductVariantRepository _varRepo;
+        private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
 
         public ProductController(
             IProductRepository productRepo,
             IVariantOptionRepository optRepo,
-            IProductVariantRepository varRepo,
-            IMapper mapper)
+            IMapper mapper,
+            IProductImageRepository imgRepo,
+            IProductVariantImageRepository varImgRep,
+            IWebHostEnvironment env,
+            IProductVariantRepository varRepo)
         {
             _productRepo = productRepo;
             _optRepo = optRepo;
-            _varRepo = varRepo;
             _mapper = mapper;
+            _imgRepo = imgRepo;
+            _varImgRepo = varImgRep;
+            _varRepo = varRepo;
+            _env = env;
+
         }
 
         // ─── Get all products ─────────────────────────────────────────────────────
@@ -123,5 +133,74 @@ namespace AttarStore.WebApi.Controllers
             if (p == null) return NotFound();
             return Ok(_mapper.Map<ProductVariantMapperView[]>(p.Variants));
         }
+
+
+        /// <summary>
+        /// Upload an image for a product.
+        /// </summary>
+        [HttpPost("{productId}/images")]
+        [Authorize(Policy = "Product.Update")]
+        public async Task<IActionResult> UploadProductImage(
+            int productId,
+            [FromForm] ProductImageUploadDto dto)
+        {
+            var product = await _productRepo.GetByIdAsync(productId);
+            if (product == null) return NotFound();
+
+            var ext = Path.GetExtension(dto.File.FileName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var imagesDir = Path.Combine(_env.WebRootPath, "images", "products");
+            Directory.CreateDirectory(imagesDir);
+            var fullPath = Path.Combine(imagesDir, fileName);
+
+            await using var fs = System.IO.File.Create(fullPath);
+            await dto.File.CopyToAsync(fs);
+
+            var img = new ProductImage
+            {
+                ProductId = productId,
+                Url = $"/images/products/{fileName}"
+            };
+            await _imgRepo.AddAsync(img);
+
+            return CreatedAtAction(nameof(UploadProductImage),
+                                   new { productId }, new { img.Id, img.Url });
+        }
+
+        /// <summary>
+        /// Upload an image for a product variant.
+        /// </summary>
+        [HttpPost("{productId}/variants/{variantId}/images")]
+        [Authorize(Policy = "Product.Update")]
+        public async Task<IActionResult> UploadVariantImage(
+            int productId,
+            int variantId,
+            [FromForm] ProductVariantImageUploadDto dto)
+        {
+            var variant = await _varRepo.GetByIdAsync(variantId);
+            if (variant == null || variant.ProductId != productId)
+                return NotFound();
+
+            var ext = Path.GetExtension(dto.File.FileName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var imagesDir = Path.Combine(_env.WebRootPath, "images", "variants");
+            Directory.CreateDirectory(imagesDir);
+            var fullPath = Path.Combine(imagesDir, fileName);
+
+            await using var fs = System.IO.File.Create(fullPath);
+            await dto.File.CopyToAsync(fs);
+
+            var img = new ProductVariantImage
+            {
+                ProductVariantId = variantId,
+                Url = $"/images/variants/{fileName}"
+            };
+            await _varImgRepo.AddAsync(img);
+
+            return CreatedAtAction(nameof(UploadVariantImage),
+                                   new { productId, variantId },
+                                   new { img.Id, img.Url });
+        }
     }
 }
+

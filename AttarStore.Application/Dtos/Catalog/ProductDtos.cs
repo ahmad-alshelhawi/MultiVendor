@@ -16,6 +16,8 @@ namespace AttarStore.Application.Dtos.Catalog
         public decimal? DefaultPrice { get; set; }
         public int? DefaultStock { get; set; }
 
+        public List<string>? ImageUrls { get; set; }
+
         public List<ProductVariantCreateDto> Variants { get; set; }
     }
 
@@ -47,16 +49,20 @@ namespace AttarStore.Application.Dtos.Catalog
         public decimal? DefaultPrice { get; set; }
         public int? DefaultStock { get; set; }
 
-        public List<ProductVariantMapperView> Variants { get; set; }
+        public IEnumerable<string> ImageUrls { get; set; } = new List<string>();
+        public IEnumerable<ProductVariantMapperView> Variants { get; set; }
+            = new List<ProductVariantMapperView>();
     }
 
     // ─── Variant “create” DTO ─────────────────────────────────────────────────
     public class ProductVariantCreateDto
     {
         [Required] public string Sku { get; set; }
-        [Required] public decimal Price { get; set; }
-        [Required] public int Stock { get; set; }
-        public List<VariantAttributeCreateDto> Attributes { get; set; }
+        [Required] public decimal? Price { get; set; }
+        [Required] public int? Stock { get; set; }
+
+        public List<string>? ImageUrls { get; set; }
+        public List<VariantAttributeCreateDto>? Attributes { get; set; }
     }
 
     // ─── Variant “update” DTO ─────────────────────────────────────────────────
@@ -73,7 +79,10 @@ namespace AttarStore.Application.Dtos.Catalog
         public decimal Price { get; set; }
         public int Stock { get; set; }
 
-        public List<VariantAttributeViewDto> Attributes { get; set; }
+        public IEnumerable<string> ImageUrls { get; set; }
+             = new List<string>();
+        public IEnumerable<VariantAttributeViewDto> Attributes { get; set; }
+            = new List<VariantAttributeViewDto>();
     }
 
     // ─── Attribute create DTO ─────────────────────────────────────────────────

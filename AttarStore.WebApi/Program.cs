@@ -184,7 +184,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IVariantOptionRepository, VariantOptionRepository>();
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
-
+builder.Services.AddScoped<IProductVariantImageRepository, ProductVariantImageRepository>();
 
 // Shopping repositories
 builder.Services.AddScoped<ICartRepository, CartRepository>();
@@ -207,7 +207,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Attar Store", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "W Motors", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",

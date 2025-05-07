@@ -27,11 +27,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AttarStore.Application\AttarStore.Application.csproj" />
+    <ProjectReference Include="..\AttarStore.Domain\AttarStore.Domain.csproj" />
     <ProjectReference Include="..\AttarStore.Infrastructure\AttarStore.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\images\variants\" />
+    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>
