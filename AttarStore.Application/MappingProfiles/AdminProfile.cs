@@ -13,9 +13,8 @@ namespace AttarStore.Api.Profiles
             CreateMap<Admin, AdminMapperView>();
 
             // Create DTO → Entity
-            CreateMap<AdminMapperCreate, Admin>()
-                // We hash the password before saving, so ignore direct mapping:
-                .ForMember(dest => dest.Password, opt => opt.Ignore());
+            CreateMap<AdminMapperCreate, Admin>();
+
 
             // Update DTO → Entity
             CreateMap<AdminMapperUpdate, Admin>()

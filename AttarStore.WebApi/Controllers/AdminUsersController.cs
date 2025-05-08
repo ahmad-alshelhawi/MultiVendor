@@ -24,16 +24,18 @@ namespace AttarStore.WebApi.Controllers
 
         // GET /api/admins/1/users
         [HttpGet]
-        [Authorize(Policy = "VendorUser.Read")]  // or a new Policy like "AdminUser.Read"
+        /*        [Authorize(Policy = "VendorUser.Read")]  // or a new Policy like "AdminUser.Read"
+        */
         public async Task<ActionResult<UserMapperView[]>> GetByAdmin(int adminId)
         {
             var users = await _userRepo.GetByAdminIdAsync(adminId);
-            return Ok(_mapper.Map<UserMapperView[]>(users));
+            return Ok(_mapper.Map<AdminUserMapperView[]>(users));
         }
 
         // POST /api/admins/1/users
         [HttpPost]
-        [Authorize(Policy = "User.Create")] // or "AdminUser.Create"
+        /*        [Authorize(Policy = "User.Create")] // or "AdminUser.Create"
+        */
         public async Task<IActionResult> Create(
             int adminId,
             [FromBody] UserMapperCreate dto)
@@ -46,7 +48,7 @@ namespace AttarStore.WebApi.Controllers
             user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             await _userRepo.AddAsync(user);
-            var result = _mapper.Map<UserMapperView>(user);
+            var result = _mapper.Map<AdminUserMapperView>(user);
 
             return CreatedAtAction(
                 nameof(GetByAdmin),

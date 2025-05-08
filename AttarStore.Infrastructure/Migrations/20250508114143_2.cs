@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AttarStore.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class _1 : Migration
+    public partial class _2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,6 +33,28 @@ namespace AttarStore.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Admins", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuditLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ActorId = table.Column<int>(type: "int", nullable: false),
+                    ActorType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ActorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActorRole = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EntityId = table.Column<int>(type: "int", nullable: true),
+                    EntityName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -312,33 +334,6 @@ namespace AttarStore.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ActorId = table.Column<int>(type: "int", nullable: false),
-                    ActorType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ActorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActorRole = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EntityId = table.Column<int>(type: "int", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AuditLogs_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RefreshTokens",
                 columns: table => new
                 {
@@ -584,7 +579,7 @@ namespace AttarStore.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "Address", "CreatedAt", "Email", "IsDeleted", "Name", "Password", "Phone", "ResetToken", "ResetTokenExpiry", "Role" },
-                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 8, 8, 42, 10, 670, DateTimeKind.Unspecified).AddTicks(6634), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$EGhOp/Jd3hl5mhsSAjp5KOCzaS/zeYqReXikiFcf5bjPtn1PebFSi", "096654467", null, null, "Admin" });
+                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 8, 11, 41, 43, 12, DateTimeKind.Unspecified).AddTicks(9671), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$bGOjI390NMD0hi/wZFcg2OlE7cIKtkgq5MXE0Wyqy4BFAFxYLh95y", "096654467", null, null, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "Permissions",
@@ -681,11 +676,6 @@ namespace AttarStore.Infrastructure.Migrations
                 table: "Admins",
                 column: "Name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AuditLogs_UserId",
-                table: "AuditLogs",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartId_ProductVariantId",

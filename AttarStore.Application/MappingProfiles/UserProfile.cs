@@ -11,18 +11,28 @@ namespace AttarStore.Api.Profiles
         {
             // Create DTO → Entity
             CreateMap<UserMapperCreate, User>()
-                // we set Role explicitly in controller, so ignore mapping here:
-                .ForMember(dest => dest.Role, opt => opt.Ignore());
+                // only overwrite Role if the DTO provided one
+                .ForMember(dest => dest.Role,
+                           opt => opt.Condition(src => src.Role is not null));
 
-            // Entity → View DTO (for returns)
-            CreateMap<User, UserMapperView>();
+            // Entity → View DTO
+            CreateMap<User, UserMapperView>()
+                .ForMember(dto => dto.Id, opt => opt.MapFrom(u => u.Id))
+                .ForMember(dto => dto.Name, opt => opt.MapFrom(u => u.Name))
+                .ForMember(dto => dto.Email, opt => opt.MapFrom(u => u.Email))
+                .ForMember(dto => dto.Phone, opt => opt.MapFrom(u => u.Phone))
+                .ForMember(dto => dto.Address, opt => opt.MapFrom(u => u.Address))
+                .ForMember(dto => dto.Role, opt => opt.MapFrom(u => u.Role));
 
-            // Update DTO → Entity
-            CreateMap<UserMapperUpdate, User>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<VendorUserCreate, User>()
-    .ForMember(dest => dest.Role, opt => opt.Ignore())
-    .ForMember(dest => dest.VendorId, opt => opt.Ignore());
+
+            CreateMap<User, AdminUserMapperView>()
+              .ForMember(dto => dto.Id, opt => opt.MapFrom(u => u.Id))
+              .ForMember(dto => dto.Name, opt => opt.MapFrom(u => u.Name))
+              .ForMember(dto => dto.Email, opt => opt.MapFrom(u => u.Email))
+              .ForMember(dto => dto.Phone, opt => opt.MapFrom(u => u.Phone))
+              .ForMember(dto => dto.Address, opt => opt.MapFrom(u => u.Address))
+              .ForMember(dto => dto.Role, opt => opt.MapFrom(u => u.Role));
+
         }
     }
 }

@@ -120,6 +120,12 @@ namespace AttarStore.WebApi.Filters
                                              .Select(p => p.Name)
                                              .FirstOrDefaultAsync();
                         break;
+                    case "Vendor":
+                        entityName = await db.Vendors
+                                             .Where(p => p.Id == finalEntityId.Value)
+                                             .Select(p => p.Name)
+                                             .FirstOrDefaultAsync();
+                        break;
                         // add cases for Subcategory, Vendor, Order, etc.
                 }
             }

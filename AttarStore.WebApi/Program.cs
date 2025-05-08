@@ -189,6 +189,7 @@ builder.Services.AddAutoMapper(
     typeof(AdminProfile).Assembly,
     typeof(ProductProfile).Assembly,
     typeof(AuditLogProfile).Assembly,
+     typeof(UserProfile).Assembly,
     typeof(CategoryRequestProfile).Assembly
 );
 

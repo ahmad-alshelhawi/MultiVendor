@@ -43,10 +43,6 @@ namespace AttarStore.Domain.Entities
 
         public ICollection<InventoryTransaction> InventoryTransactions { get; set; }
              = new List<InventoryTransaction>();
-        public ICollection<AuditLog> AuditLogs { get; set; }
-            = new List<AuditLog>();
-
-
 
 
 

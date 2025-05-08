@@ -18,12 +18,12 @@ namespace AttarStore.Application.Dtos
     // ─── Create DTO ───────────────────────────────────────────────────────────
     public class UserMapperCreate
     {
-        [Required] public string Name { get; set; }
-        [Required] public string Email { get; set; }
-        [Required] public string Password { get; set; }
-        [Required] public string Phone { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string Phone { get; set; }
         public string Address { get; set; }
-        public string Role { get; set; }
+        public string? Role { get; set; }
 
     }
 
@@ -65,4 +65,16 @@ namespace AttarStore.Application.Dtos
         public string Phone { get; set; }
         public string Address { get; set; }
     }
+    public class AdminUserMapperView
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string Address { get; set; }
+        public string Role { get; set; }
+        public bool IsActive { get; set; }
+        public int? AdminId { get; set; }
+    }
+
 }

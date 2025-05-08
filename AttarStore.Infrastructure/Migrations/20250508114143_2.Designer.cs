@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250508095229_2")]
+    [Migration("20250508114143_2")]
     partial class _2
     {
         /// <inheritdoc />
@@ -84,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 8, 9, 52, 28, 684, DateTimeKind.Unspecified).AddTicks(6379), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 8, 11, 41, 43, 12, DateTimeKind.Unspecified).AddTicks(9671), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$Jg7wRF.Hq88n4dE1sbupUuNlwhWcTXyEWm2PgoFFT7XdW2VaM2O/q",
+                            Password = "$2a$11$bGOjI390NMD0hi/wZFcg2OlE7cIKtkgq5MXE0Wyqy4BFAFxYLh95y",
                             Phone = "096654467",
                             Role = "Admin"
                         });
@@ -140,12 +140,7 @@ namespace AttarStore.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("AuditLogs");
                 });
@@ -1257,13 +1252,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("ProductVariants");
                 });
 
-            modelBuilder.Entity("AttarStore.Domain.Entities.Auth.AuditLog", b =>
-                {
-                    b.HasOne("AttarStore.Domain.Entities.User", null)
-                        .WithMany("AuditLogs")
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.RefreshToken", b =>
                 {
                     b.HasOne("AttarStore.Domain.Entities.Admin", "Admin")
@@ -1575,8 +1563,6 @@ namespace AttarStore.Infrastructure.Migrations
 
             modelBuilder.Entity("AttarStore.Domain.Entities.User", b =>
                 {
-                    b.Navigation("AuditLogs");
-
                     b.Navigation("InventoryTransactions");
 
                     b.Navigation("RefreshTokens");
