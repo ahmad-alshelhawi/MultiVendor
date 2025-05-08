@@ -42,7 +42,12 @@ namespace AttarStore.Domain.Entities
             = new List<UserPermission>();
 
         public ICollection<InventoryTransaction> InventoryTransactions { get; set; }
-      = new List<InventoryTransaction>();
+             = new List<InventoryTransaction>();
+        public ICollection<AuditLog> AuditLogs { get; set; }
+            = new List<AuditLog>();
+
+
+
 
 
     }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AttarStore.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init1 : Migration
+    public partial class _1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -166,7 +166,7 @@ namespace AttarStore.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ClientId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -221,6 +221,30 @@ namespace AttarStore.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CategoryRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    VendorId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResponseMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CategoryRequests_Vendors_VendorId",
+                        column: x => x.VendorId,
+                        principalTable: "Vendors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -233,6 +257,8 @@ namespace AttarStore.Infrastructure.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VendorId = table.Column<int>(type: "int", nullable: true),
+                    AdminId = table.Column<int>(type: "int", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ResetToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -241,6 +267,11 @@ namespace AttarStore.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Admins_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "Admins",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Users_Vendors_VendorId",
                         column: x => x.VendorId,
@@ -258,7 +289,10 @@ namespace AttarStore.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SubcategoryId = table.Column<int>(type: "int", nullable: true)
+                    SubcategoryId = table.Column<int>(type: "int", nullable: true),
+                    VendorId = table.Column<int>(type: "int", nullable: true),
+                    DefaultPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DefaultStock = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -269,6 +303,39 @@ namespace AttarStore.Infrastructure.Migrations
                         principalTable: "Subcategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Products_Vendors_VendorId",
+                        column: x => x.VendorId,
+                        principalTable: "Vendors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuditLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ActorId = table.Column<int>(type: "int", nullable: false),
+                    ActorType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ActorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActorRole = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EntityId = table.Column<int>(type: "int", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuditLogs_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -309,14 +376,34 @@ namespace AttarStore.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    PermissionName = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsGranted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPermissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserPermissions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductImages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "bit", nullable: false)
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -336,9 +423,9 @@ namespace AttarStore.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    SKU = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Sku = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Stock = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -375,6 +462,42 @@ namespace AttarStore.Infrastructure.Migrations
                         name: "FK_CartItems_ProductVariants_ProductVariantId",
                         column: x => x.ProductVariantId,
                         principalTable: "ProductVariants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InventoryTransactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductVariantId = table.Column<int>(type: "int", nullable: true),
+                    ProductId = table.Column<int>(type: "int", nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InventoryTransactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_InventoryTransactions_ProductVariants_ProductVariantId",
+                        column: x => x.ProductVariantId,
+                        principalTable: "ProductVariants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InventoryTransactions_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_InventoryTransactions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -438,10 +561,30 @@ namespace AttarStore.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProductVariantImage",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductVariantId = table.Column<int>(type: "int", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductVariantImage", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductVariantImage_ProductVariants_ProductVariantId",
+                        column: x => x.ProductVariantId,
+                        principalTable: "ProductVariants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "Address", "CreatedAt", "Email", "IsDeleted", "Name", "Password", "Phone", "ResetToken", "ResetTokenExpiry", "Role" },
-                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 5, 7, 58, 9, 993, DateTimeKind.Unspecified).AddTicks(1038), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$zmbIkBatTA1GHJnl1vgHguU66qQ3vNjNG1cKOtpatj/cXgUsRhv1G", "096654467", null, null, "Admin" });
+                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 8, 8, 42, 10, 670, DateTimeKind.Unspecified).AddTicks(6634), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$EGhOp/Jd3hl5mhsSAjp5KOCzaS/zeYqReXikiFcf5bjPtn1PebFSi", "096654467", null, null, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "Permissions",
@@ -460,7 +603,22 @@ namespace AttarStore.Infrastructure.Migrations
                     { 10, "View all orders (admins)", "Order.ReadAll" },
                     { 11, "View own orders", "Order.ReadOwn" },
                     { 12, "Update orders", "Order.Update" },
-                    { 13, "Cancel orders", "Order.Delete" }
+                    { 13, "Cancel orders", "Order.Delete" },
+                    { 14, "Manage permissions", "Permission.Create" },
+                    { 15, "View permissions", "Permission.Read" },
+                    { 16, "Edit permissions", "Permission.Update" },
+                    { 17, "Remove permissions", "Permission.Delete" },
+                    { 18, "Vendor requests a new category", "CategoryRequest.Create" },
+                    { 19, "Vendor reads own category requests", "CategoryRequest.ReadOwn" },
+                    { 20, "Admin reads all category requests", "CategoryRequest.ReadAll" },
+                    { 21, "Admin approves/rejects requests", "CategoryRequest.Update" },
+                    { 22, "Admin add new user assigned to a vendor", "VendorUser.Create" },
+                    { 23, "Admin reads users of a specific vendor", "VendorUser.Read" },
+                    { 24, "Admin updates vendor’s user", "VendorUser.Update" },
+                    { 40, "Create vendors", "Vendor.Create" },
+                    { 41, "View vendors", "Vendor.Read" },
+                    { 42, "Edit vendors", "Vendor.Update" },
+                    { 43, "Delete vendors", "Vendor.Delete" }
                 });
 
             migrationBuilder.InsertData(
@@ -492,10 +650,24 @@ namespace AttarStore.Infrastructure.Migrations
                     { 22, 11, "VendorAdmin" },
                     { 23, 6, "VendorUser" },
                     { 24, 7, "VendorUser" },
-                    { 25, 6, "Client" },
-                    { 26, 9, "Client" },
-                    { 27, 11, "Client" },
-                    { 28, 5, "VendorUser" }
+                    { 25, 5, "VendorUser" },
+                    { 26, 6, "Client" },
+                    { 27, 9, "Client" },
+                    { 28, 11, "Client" },
+                    { 29, 14, "Admin" },
+                    { 30, 15, "Admin" },
+                    { 31, 16, "Admin" },
+                    { 32, 17, "Admin" },
+                    { 33, 18, "VendorAdmin" },
+                    { 34, 19, "VendorAdmin" },
+                    { 35, 20, "Admin" },
+                    { 36, 21, "Admin" },
+                    { 37, 40, "Admin" },
+                    { 38, 41, "Admin" },
+                    { 39, 42, "Admin" },
+                    { 40, 43, "Admin" },
+                    { 41, 41, "VendorAdmin" },
+                    { 42, 42, "VendorAdmin" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -509,6 +681,11 @@ namespace AttarStore.Infrastructure.Migrations
                 table: "Admins",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditLogs_UserId",
+                table: "AuditLogs",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartId_ProductVariantId",
@@ -528,6 +705,11 @@ namespace AttarStore.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CategoryRequests_VendorId",
+                table: "CategoryRequests",
+                column: "VendorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clients_Email",
                 table: "Clients",
                 column: "Email",
@@ -538,6 +720,21 @@ namespace AttarStore.Infrastructure.Migrations
                 table: "Clients",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InventoryTransactions_ProductId",
+                table: "InventoryTransactions",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InventoryTransactions_ProductVariantId",
+                table: "InventoryTransactions",
+                column: "ProductVariantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InventoryTransactions_UserId",
+                table: "InventoryTransactions",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId_ProductVariantId",
@@ -572,6 +769,11 @@ namespace AttarStore.Infrastructure.Migrations
                 column: "SubcategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_VendorId",
+                table: "Products",
+                column: "VendorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductVariantAttributes_VariantOptionId",
                 table: "ProductVariantAttributes",
                 column: "VariantOptionId");
@@ -582,9 +784,14 @@ namespace AttarStore.Infrastructure.Migrations
                 column: "VariantOptionValueId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductVariants_ProductId_SKU",
+                name: "IX_ProductVariantImage_ProductVariantId",
+                table: "ProductVariantImage",
+                column: "ProductVariantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductVariants_ProductId_Sku",
                 table: "ProductVariants",
-                columns: new[] { "ProductId", "SKU" },
+                columns: new[] { "ProductId", "Sku" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -614,6 +821,17 @@ namespace AttarStore.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserPermissions_UserId_PermissionName",
+                table: "UserPermissions",
+                columns: new[] { "UserId", "PermissionName" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_AdminId",
+                table: "Users",
+                column: "AdminId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
@@ -640,7 +858,16 @@ namespace AttarStore.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AuditLogs");
+
+            migrationBuilder.DropTable(
                 name: "CartItems");
+
+            migrationBuilder.DropTable(
+                name: "CategoryRequests");
+
+            migrationBuilder.DropTable(
+                name: "InventoryTransactions");
 
             migrationBuilder.DropTable(
                 name: "OrderItems");
@@ -652,10 +879,16 @@ namespace AttarStore.Infrastructure.Migrations
                 name: "ProductVariantAttributes");
 
             migrationBuilder.DropTable(
+                name: "ProductVariantImage");
+
+            migrationBuilder.DropTable(
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "RolePermissions");
+
+            migrationBuilder.DropTable(
+                name: "UserPermissions");
 
             migrationBuilder.DropTable(
                 name: "Carts");
@@ -664,34 +897,34 @@ namespace AttarStore.Infrastructure.Migrations
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "ProductVariants");
-
-            migrationBuilder.DropTable(
                 name: "VariantOptionValues");
 
             migrationBuilder.DropTable(
-                name: "Admins");
-
-            migrationBuilder.DropTable(
-                name: "Users");
+                name: "ProductVariants");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
 
             migrationBuilder.DropTable(
-                name: "Clients");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "Clients");
 
             migrationBuilder.DropTable(
                 name: "VariantOptions");
 
             migrationBuilder.DropTable(
-                name: "Vendors");
+                name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Admins");
 
             migrationBuilder.DropTable(
                 name: "Subcategories");
+
+            migrationBuilder.DropTable(
+                name: "Vendors");
 
             migrationBuilder.DropTable(
                 name: "Categories");

@@ -81,14 +81,70 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 7, 18, 18, 24, 704, DateTimeKind.Unspecified).AddTicks(6425), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 8, 9, 52, 28, 684, DateTimeKind.Unspecified).AddTicks(6379), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$ZgNeyzhGsSCOw6mgoNkKRe.WD2EQaauyrPjMP2FPUbSCrdyzSOoI2",
+                            Password = "$2a$11$Jg7wRF.Hq88n4dE1sbupUuNlwhWcTXyEWm2PgoFFT7XdW2VaM2O/q",
                             Phone = "096654467",
                             Role = "Admin"
                         });
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Auth.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ActorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActorRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActorType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.Permission", b =>
@@ -1198,6 +1254,13 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("ProductVariants");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.Auth.AuditLog", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.User", null)
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.RefreshToken", b =>
                 {
                     b.HasOne("AttarStore.Domain.Entities.Admin", "Admin")
@@ -1509,6 +1572,8 @@ namespace AttarStore.Infrastructure.Migrations
 
             modelBuilder.Entity("AttarStore.Domain.Entities.User", b =>
                 {
+                    b.Navigation("AuditLogs");
+
                     b.Navigation("InventoryTransactions");
 
                     b.Navigation("RefreshTokens");

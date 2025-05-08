@@ -44,6 +44,9 @@ namespace AttarStore.Services.Data
         // ─── Inventory ───────────────────────────────────────────────────────────
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
 
+        // ─── Audit logs ──────────────────────────────────────────────────────────
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -242,6 +245,21 @@ namespace AttarStore.Services.Data
 
                 eb.Property(it => it.Reason).IsRequired();
                 eb.Property(it => it.Timestamp)
+                  .HasDefaultValueSql("GETUTCDATE()");
+            });
+
+
+            // ─── AuditLog ─────────────────────────────────────────────────────────
+            modelBuilder.Entity<AuditLog>(eb =>
+            {
+                eb.HasKey(a => a.Id);
+                // no foreign keys here!
+                eb.Property(a => a.ActorType).IsRequired().HasMaxLength(50);
+                eb.Property(a => a.ActorName).IsRequired();
+                eb.Property(a => a.ActorRole).IsRequired();
+                eb.Property(a => a.Action).IsRequired();
+                eb.Property(a => a.EntityType).IsRequired();
+                eb.Property(a => a.Timestamp)
                   .HasDefaultValueSql("GETUTCDATE()");
             });
 

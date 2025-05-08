@@ -4,6 +4,7 @@ using AttarStore.Application.MappingProfiles;
 using AttarStore.Domain.Interfaces;
 using AttarStore.Domain.Interfaces.Catalog;
 using AttarStore.Domain.Interfaces.Shopping;
+using AttarStore.Infrastructure.Repositories;
 using AttarStore.Infrastructure.Repositories.Catalog;
 using AttarStore.Infrastructure.Repositories.Shopping;
 using AttarStore.Infrastructure.Services;
@@ -13,6 +14,7 @@ using AttarStore.Services.Interfaces.Catalog;
 using AttarStore.Services.Repositories;
 using AttarStore.Services.Repositories.Catalog;
 using AttarStore.WebApi.Authorization;
+using AttarStore.WebApi.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -162,15 +164,22 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Vendor.Delete", policy => policy.Requirements.Add(new PermissionRequirement("Vendor.Delete")));
 
 
-        options.AddPolicy("CategoryRequest.Create", policy =>
-            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Create")));
-        options.AddPolicy("CategoryRequest.ReadOwn", policy =>
-            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadOwn")));
-        options.AddPolicy("CategoryRequest.ReadAll", policy =>
-            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadAll")));
-        options.AddPolicy("CategoryRequest.Update", policy =>
-            policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Update")));
-    });
+    options.AddPolicy("CategoryRequest.Create", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Create")));
+    options.AddPolicy("CategoryRequest.ReadOwn", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadOwn")));
+    options.AddPolicy("CategoryRequest.ReadAll", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.ReadAll")));
+    options.AddPolicy("CategoryRequest.Update", policy =>
+        policy.Requirements.Add(new PermissionRequirement("CategoryRequest.Update")));
+
+
+    options.AddPolicy("AuditLog.ReadAll", policy =>
+       policy.RequireRole("Admin"));              // only Admin role
+
+    options.AddPolicy("AuditLog.ReadOwn", policy =>
+        policy.RequireAuthenticatedUser());        // any logged-in user
+});
 
 
 
@@ -179,6 +188,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddAutoMapper(
     typeof(AdminProfile).Assembly,
     typeof(ProductProfile).Assembly,
+    typeof(AuditLogProfile).Assembly,
     typeof(CategoryRequestProfile).Assembly
 );
 
@@ -212,11 +222,33 @@ builder.Services.AddScoped<IVendorService, VendorService>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
+//Audit log
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContextAccessor, HttpContextUserAccessor>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
 
+builder.Services.AddScoped<AuditLogFilter>();
+
+/*builder.Services.AddScoped<AuditLogFilter>(sp =>
+    new AuditLogFilter(
+        sp.GetRequiredService<IAuditLogRepository>(),
+        skipControllers: new[] { "Auth", "Health" },     // controller names to skip
+        skipRoles: new[] { "Client", "VendorUser" } // roles to skip entirely
+    )
+);*/
+
+/*builder.Services.AddMvc(options =>
+{
+    options.Filters.Add<AuditLogFilter>();
+});*/
 
 // ─── Controllers & Swagger ─────────────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<AuditLogFilter>();
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

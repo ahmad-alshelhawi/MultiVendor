@@ -6,39 +6,38 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AttarStore.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class _9 : Migration
+    public partial class _2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "Users",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.AddColumn<string>(
+                name: "EntityName",
+                table: "AuditLogs",
+                type: "nvarchar(max)",
+                nullable: true);
 
             migrationBuilder.UpdateData(
                 table: "Admins",
                 keyColumn: "Id",
                 keyValue: 1,
                 columns: new[] { "CreatedAt", "Password" },
-                values: new object[] { new DateTimeOffset(new DateTime(2025, 5, 6, 10, 5, 35, 931, DateTimeKind.Unspecified).AddTicks(8598), new TimeSpan(0, 0, 0, 0, 0)), "$2a$11$SZClOj.BVc1UO5FgXqfpLOqegEi2Itks61tdEoMsDlJvhFkO1dRw2" });
+                values: new object[] { new DateTimeOffset(new DateTime(2025, 5, 8, 9, 52, 28, 684, DateTimeKind.Unspecified).AddTicks(6379), new TimeSpan(0, 0, 0, 0, 0)), "$2a$11$Jg7wRF.Hq88n4dE1sbupUuNlwhWcTXyEWm2PgoFFT7XdW2VaM2O/q" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "Users");
+                name: "EntityName",
+                table: "AuditLogs");
 
             migrationBuilder.UpdateData(
                 table: "Admins",
                 keyColumn: "Id",
                 keyValue: 1,
                 columns: new[] { "CreatedAt", "Password" },
-                values: new object[] { new DateTimeOffset(new DateTime(2025, 5, 6, 9, 44, 42, 471, DateTimeKind.Unspecified).AddTicks(4478), new TimeSpan(0, 0, 0, 0, 0)), "$2a$11$bMTRPyh4EhIa/qRr9l.hpebiO68lQDm7JvQnCORcLKVytzIwJAW1e" });
+                values: new object[] { new DateTimeOffset(new DateTime(2025, 5, 8, 8, 42, 10, 670, DateTimeKind.Unspecified).AddTicks(6634), new TimeSpan(0, 0, 0, 0, 0)), "$2a$11$EGhOp/Jd3hl5mhsSAjp5KOCzaS/zeYqReXikiFcf5bjPtn1PebFSi" });
         }
     }
 }

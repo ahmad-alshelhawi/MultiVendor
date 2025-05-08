@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250505191441_init7")]
-    partial class init7
+    [Migration("20250508095229_2")]
+    partial class _2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,14 +84,70 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 5, 19, 14, 40, 275, DateTimeKind.Unspecified).AddTicks(2196), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 8, 9, 52, 28, 684, DateTimeKind.Unspecified).AddTicks(6379), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$U/F8KsXzsboCB3JomyKf2O.WmFNFAfEgZQ/ygbO9U3ku3qDF8j8eW",
+                            Password = "$2a$11$Jg7wRF.Hq88n4dE1sbupUuNlwhWcTXyEWm2PgoFFT7XdW2VaM2O/q",
                             Phone = "096654467",
                             Role = "Admin"
                         });
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Auth.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ActorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActorRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActorType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.Permission", b =>
@@ -246,20 +302,44 @@ namespace AttarStore.Infrastructure.Migrations
                         new
                         {
                             Id = 22,
-                            Description = "Admin Add new user assigined to a Vendor",
+                            Description = "Admin add new user assigned to a vendor",
                             Name = "VendorUser.Create"
                         },
                         new
                         {
                             Id = 23,
-                            Description = "Admin reads users belong to a spicefic Vendor",
+                            Description = "Admin reads users of a specific vendor",
                             Name = "VendorUser.Read"
                         },
                         new
                         {
                             Id = 24,
-                            Description = "Admin update User Belong to a Vendor",
+                            Description = "Admin updates vendor’s user",
                             Name = "VendorUser.Update"
+                        },
+                        new
+                        {
+                            Id = 40,
+                            Description = "Create vendors",
+                            Name = "Vendor.Create"
+                        },
+                        new
+                        {
+                            Id = 41,
+                            Description = "View vendors",
+                            Name = "Vendor.Read"
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Description = "Edit vendors",
+                            Name = "Vendor.Update"
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Description = "Delete vendors",
+                            Name = "Vendor.Delete"
                         });
                 });
 
@@ -547,20 +627,38 @@ namespace AttarStore.Infrastructure.Migrations
                         new
                         {
                             Id = 37,
-                            PermissionId = 22,
+                            PermissionId = 40,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 38,
-                            PermissionId = 23,
+                            PermissionId = 41,
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 39,
-                            PermissionId = 24,
+                            PermissionId = 42,
                             RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 40,
+                            PermissionId = 43,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 41,
+                            PermissionId = 41,
+                            RoleName = "VendorAdmin"
+                        },
+                        new
+                        {
+                            Id = 42,
+                            PermissionId = 42,
+                            RoleName = "VendorAdmin"
                         });
                 });
 
@@ -623,14 +721,17 @@ namespace AttarStore.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponseMessage")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -645,6 +746,47 @@ namespace AttarStore.Infrastructure.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("CategoryRequests");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DefaultPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("DefaultStock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SubcategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubcategoryId");
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductImage", b =>
@@ -687,6 +829,28 @@ namespace AttarStore.Infrastructure.Migrations
                     b.HasIndex("VariantOptionValueId");
 
                     b.ToTable("ProductVariantAttributes");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariantImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("ProductVariantImage");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Subcategory", b =>
@@ -866,6 +1030,46 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("CartItems");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.InventoryTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("InventoryTransactions");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -877,8 +1081,8 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -942,6 +1146,9 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1021,41 +1228,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("Vendors");
                 });
 
-            modelBuilder.Entity("Product", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("SubcategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VendorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubcategoryId");
-
-                    b.HasIndex("VendorId");
-
-                    b.ToTable("Products");
-                });
-
             modelBuilder.Entity("ProductVariant", b =>
                 {
                     b.Property<int>("Id")
@@ -1083,6 +1255,13 @@ namespace AttarStore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Auth.AuditLog", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.User", null)
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.RefreshToken", b =>
@@ -1142,9 +1321,26 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Vendor");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Product", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.Subcategory", "Subcategory")
+                        .WithMany("Products")
+                        .HasForeignKey("SubcategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AttarStore.Domain.Entities.Vendor", "Vendor")
+                        .WithMany("Products")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Subcategory");
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductImage", b =>
                 {
-                    b.HasOne("Product", "Product")
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1178,6 +1374,17 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("VariantOption");
 
                     b.Navigation("VariantOptionValue");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.ProductVariantImage", b =>
+                {
+                    b.HasOne("ProductVariant", "ProductVariant")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Subcategory", b =>
@@ -1232,6 +1439,30 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.InventoryTransaction", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.Product", "Product")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProductVariant", "ProductVariant")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AttarStore.Domain.Entities.User", "User")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.Order", b =>
                 {
                     b.HasOne("AttarStore.Domain.Entities.Client", "Client")
@@ -1278,27 +1509,9 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("Product", b =>
-                {
-                    b.HasOne("AttarStore.Domain.Entities.Catalog.Subcategory", "Subcategory")
-                        .WithMany("Products")
-                        .HasForeignKey("SubcategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AttarStore.Domain.Entities.Vendor", "Vendor")
-                        .WithMany("Products")
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Subcategory");
-
-                    b.Navigation("Vendor");
-                });
-
             modelBuilder.Entity("ProductVariant", b =>
                 {
-                    b.HasOne("Product", "Product")
+                    b.HasOne("AttarStore.Domain.Entities.Catalog.Product", "Product")
                         .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1320,6 +1533,15 @@ namespace AttarStore.Infrastructure.Migrations
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Category", b =>
                 {
                     b.Navigation("Subcategories");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Product", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("InventoryTransactions");
+
+                    b.Navigation("Variants");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Catalog.Subcategory", b =>
@@ -1353,6 +1575,10 @@ namespace AttarStore.Infrastructure.Migrations
 
             modelBuilder.Entity("AttarStore.Domain.Entities.User", b =>
                 {
+                    b.Navigation("AuditLogs");
+
+                    b.Navigation("InventoryTransactions");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("UserPermissions");
@@ -1367,16 +1593,13 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Product", b =>
-                {
-                    b.Navigation("Images");
-
-                    b.Navigation("Variants");
-                });
-
             modelBuilder.Entity("ProductVariant", b =>
                 {
                     b.Navigation("Attributes");
+
+                    b.Navigation("Images");
+
+                    b.Navigation("InventoryTransactions");
                 });
 #pragma warning restore 612, 618
         }
