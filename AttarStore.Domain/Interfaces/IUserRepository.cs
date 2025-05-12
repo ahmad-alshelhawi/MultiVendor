@@ -60,5 +60,11 @@ namespace AttarStore.Domain.Interfaces
         Task<User[]> GetByVendorIdAsync(int vendorId);
         Task<User[]> GetByAdminIdAsync(int adminId);
 
+
+
+        // → Returns all users in a given role
+        Task<IEnumerable<User>> GetByRoleAsync(string roleName);
+
+        // → Returns every user
     }
 }

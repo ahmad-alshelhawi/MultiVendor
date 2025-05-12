@@ -278,7 +278,10 @@ namespace AttarStore.Services.Repositories
         .Where(u => !u.IsDeleted && u.AdminId == adminId)
         .ToArrayAsync();
 
+        public async Task<IEnumerable<User>> GetByRoleAsync(string roleName) =>
+         await _db.Users
+                   .Where(u => u.Role == roleName)
+                   .ToListAsync();
+
     }
-
-
 }

@@ -47,6 +47,10 @@ namespace AttarStore.Services.Data
         // ─── Audit logs ──────────────────────────────────────────────────────────
         public DbSet<AuditLog> AuditLogs { get; set; }
 
+        // ─── Notifications ──────────────────────────────────────────────────────────
+
+        public DbSet<Notification> Notifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -261,6 +265,19 @@ namespace AttarStore.Services.Data
                 eb.Property(a => a.EntityType).IsRequired();
                 eb.Property(a => a.Timestamp)
                   .HasDefaultValueSql("GETUTCDATE()");
+            });
+
+            // ─── Notifications ─────────────────────────────────────────────────────────
+
+
+            modelBuilder.Entity<Notification>(b =>
+            {
+                b.ToTable("Notifications");
+                b.HasKey(x => x.Id);
+                b.HasOne<User>()                   // adjust if your User entity namespace differs
+                 .WithMany()
+                 .HasForeignKey(x => x.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ─── Seed: Default Admin ───────────────────────────────────────────────

@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+</head>
+<body>
+    <h1>Notifications Test</h1>
+    <pre id="log"></pre>
+    <script>
+        const log = msg => {
+            document.getElementById('log').innerText += msg + "\n";
+        };
+
+        // 1) build connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/notifications", {
+                accessTokenFactory: () => /* fetch your JWT cookie or header token */
+                    document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('accessToken='))
+                        ?.split('=')[1] || ''
+            })
+            .build();
+
+        // 2) subscribe
+        connection.on("ReceiveNotification", payload => {
+            log("▶️ Received: " + JSON.stringify(payload));
+        });
+
+        // 3) start
+        connection.start()
+            .then(() => log("✅ Connected to Notifications hub"))
+            .catch(err => log("❌ Connection error: " + err));
+    </script>
+</body>
+</html>

@@ -95,6 +95,23 @@ namespace AttarStore.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
@@ -579,7 +596,7 @@ namespace AttarStore.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "Address", "CreatedAt", "Email", "IsDeleted", "Name", "Password", "Phone", "ResetToken", "ResetTokenExpiry", "Role" },
-                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 8, 11, 41, 43, 12, DateTimeKind.Unspecified).AddTicks(9671), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$bGOjI390NMD0hi/wZFcg2OlE7cIKtkgq5MXE0Wyqy4BFAFxYLh95y", "096654467", null, null, "Admin" });
+                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 9, 7, 12, 28, 279, DateTimeKind.Unspecified).AddTicks(4098), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$ido2xCnkzLGGFrScgRlHnuMSp8Nl4CFfyWsRhvDrPP30Fl2ggPeqO", "096654467", null, null, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "Permissions",
@@ -858,6 +875,9 @@ namespace AttarStore.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "InventoryTransactions");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "OrderItems");
