@@ -1,36 +1,64 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8" />
+    <title>SignalR Notifications Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 1rem;
+            background: #f4f4f4;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: #222;
+            color: #eee;
+            padding: 1rem;
+            border-radius: 4px;
+            max-height: 70vh;
+            overflow: auto;
+        }
+    </style>
 </head>
 <body>
     <h1>Notifications Test</h1>
+    <button id="connectBtn">Connect to Notifications Hub</button>
     <pre id="log"></pre>
+
     <script>
         const log = msg => {
-            document.getElementById('log').innerText += msg + "\n";
+            const p = document.getElementById('log');
+            p.innerText += msg + "\n";
+            p.scrollTop = p.scrollHeight;
         };
 
-        // 1) build connection
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/notifications", {
-                accessTokenFactory: () => /* fetch your JWT cookie or header token */
-                    document.cookie
-                        .split('; ')
-                        .find(row => row.startsWith('accessToken='))
-                        ?.split('=')[1] || ''
-            })
-            .build();
+        document.getElementById('connectBtn').onclick = async () => {
+            // 1) Build the SignalR connection. Cookies (your JWT) are sent automatically.
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/notifications')      // same-origin URL
+                .withAutomaticReconnect()
+                .build();
 
-        // 2) subscribe
-        connection.on("ReceiveNotification", payload => {
-            log("▶️ Received: " + JSON.stringify(payload));
-        });
+            // 2) Subscribe to the ReceiveNotification event
+            connection.on('ReceiveNotification', payload => {
+                log('▶️ Received: ' + JSON.stringify(payload, null, 2));
+            });
 
-        // 3) start
-        connection.start()
-            .then(() => log("✅ Connected to Notifications hub"))
-            .catch(err => log("❌ Connection error: " + err));
+            // 3) Start the connection
+            try {
+                await connection.start();
+                log('✅ Connected to Notifications hub');
+            } catch (err) {
+                log('❌ Connection error: ' + err);
+            }
+        };
     </script>
 </body>
 </html>
