@@ -1,30 +1,40 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AttarStore.Domain.Entities.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace AttarStore.Infrastructure.Hubs
 {
-    //[Authorize]
+
+    [Authorize]
     public class NotificationHub : Hub
     {
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId != null)
-            {
-                // join user-specific group
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"user_{userId}");
+            var idClaim = Context.User?.FindFirst(ClaimTypes.NameIdentifier);
+            if (idClaim == null) return;
+            var id = idClaim.Value;
 
-                // join all role groups
-                var roles = Context.User.Claims
-                               .Where(c => c.Type == ClaimTypes.Role)
-                               .Select(c => c.Value);
-                foreach (var r in roles)
-                    await Groups.AddToGroupAsync(Context.ConnectionId, r);
+            // Admins (core Admin table)
+            if (Context.User.IsInRole(Roles.Admin))
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"Admin_{id}");
+
+            // Clients (core Client table)
+            if (Context.User.IsInRole(Roles.Client))
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"Client_{id}");
+
+            // User-table roles only
+            if (Context.User.IsInRole(Roles.AdminUser)
+             || Context.User.IsInRole(Roles.VendorAdmin)
+             || Context.User.IsInRole(Roles.VendorUser))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"User_{id}");
             }
 
             await base.OnConnectedAsync();
         }
     }
 }
+
+

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AttarStore.Domain.Entities;
+using AttarStore.Domain.Entities.Auth;
+using AttarStore.Domain.Interfaces;
+using AttarStore.Services.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AttarStore.Domain.Entities;
-using AttarStore.Services.Data;
-using AttarStore.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace AttarStore.Services.Repositories
 {
@@ -102,5 +103,24 @@ namespace AttarStore.Services.Repositories
 
         public async Task<bool> SaveChangesAsync()
             => await _db.SaveChangesAsync() > 0;
+
+        public async Task<IEnumerable<User>> GetUsersByVendorIdAsync(int vendorId)
+        {
+            // If your User entity has a VendorId FK:
+            return await _db.Users
+                             .Where(u => u.VendorId == vendorId)
+                             .ToListAsync();
+
+            // Or, if you prefer navigating from Vendor:
+            // var vendor = await _ctx.Vendors
+            //                        .Include(v => v.Users)
+            //                        .FirstOrDefaultAsync(v => v.Id == vendorId);
+            // return vendor?.Users ?? Enumerable.Empty<User>();
+        }
+        public async Task<IEnumerable<User>> GetAssignedUsersAsync(int vendorId)
+            => await _db.Users
+                         .Where(u => u.VendorId == vendorId
+                                  && (u.Role == Roles.VendorAdmin || u.Role == Roles.VendorUser))
+                         .ToListAsync();
     }
 }

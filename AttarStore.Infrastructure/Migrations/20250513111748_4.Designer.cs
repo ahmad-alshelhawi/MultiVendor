@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250509071228_2")]
-    partial class _2
+    [Migration("20250513111748_4")]
+    partial class _4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,14 +84,32 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 9, 7, 12, 28, 279, DateTimeKind.Unspecified).AddTicks(4098), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 13, 11, 17, 47, 602, DateTimeKind.Unspecified).AddTicks(753), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$ido2xCnkzLGGFrScgRlHnuMSp8Nl4CFfyWsRhvDrPP30Fl2ggPeqO",
+                            Password = "$2a$11$77KBwDHDXBlyHLCzBW2irO0UBDP1MHq4DFaHJkdnzUs1Y2a39BFeW",
                             Phone = "096654467",
                             Role = "Admin"
                         });
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.AdminNotification", b =>
+                {
+                    b.Property<int>("AdminId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdminId", "NotificationId");
+
+                    b.HasIndex("NotificationId");
+
+                    b.ToTable("AdminNotifications");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.AuditLog", b =>
@@ -143,38 +161,6 @@ namespace AttarStore.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AuditLogs");
-                });
-
-            modelBuilder.Entity("AttarStore.Domain.Entities.Auth.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.Permission", b =>
@@ -1005,6 +991,48 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.ClientNotification", b =>
+                {
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ClientId", "NotificationId");
+
+                    b.HasIndex("NotificationId");
+
+                    b.ToTable("ClientNotifications");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.Cart", b =>
                 {
                     b.Property<int>("Id")
@@ -1220,6 +1248,24 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.UserNotification", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId", "NotificationId");
+
+                    b.HasIndex("NotificationId");
+
+                    b.ToTable("UserNotifications");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Vendor", b =>
                 {
                     b.Property<int>("Id")
@@ -1255,6 +1301,24 @@ namespace AttarStore.Infrastructure.Migrations
                     b.ToTable("Vendors");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.VendorNotification", b =>
+                {
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("VendorId", "NotificationId");
+
+                    b.HasIndex("NotificationId");
+
+                    b.ToTable("VendorNotifications");
+                });
+
             modelBuilder.Entity("ProductVariant", b =>
                 {
                     b.Property<int>("Id")
@@ -1282,6 +1346,25 @@ namespace AttarStore.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.AdminNotification", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.Admin", "Admin")
+                        .WithMany("AdminNotifications")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AttarStore.Domain.Entities.Notification", "Notification")
+                        .WithMany("AdminNotifications")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("Notification");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.RefreshToken", b =>
@@ -1429,6 +1512,25 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("VariantOption");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.ClientNotification", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.Client", "Client")
+                        .WithMany("ClientNotifications")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AttarStore.Domain.Entities.Notification", "Notification")
+                        .WithMany("ClientNotifications")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Notification");
+                });
+
             modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.Cart", b =>
                 {
                     b.HasOne("AttarStore.Domain.Entities.Client", "Client")
@@ -1529,6 +1631,44 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Vendor");
                 });
 
+            modelBuilder.Entity("AttarStore.Domain.Entities.UserNotification", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.Notification", "Notification")
+                        .WithMany("UserNotifications")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AttarStore.Domain.Entities.User", "User")
+                        .WithMany("UserNotifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.VendorNotification", b =>
+                {
+                    b.HasOne("AttarStore.Domain.Entities.Notification", "Notification")
+                        .WithMany("VendorNotifications")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AttarStore.Domain.Entities.Vendor", "Vendor")
+                        .WithMany("VendorNotifications")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("ProductVariant", b =>
                 {
                     b.HasOne("AttarStore.Domain.Entities.Catalog.Product", "Product")
@@ -1542,6 +1682,8 @@ namespace AttarStore.Infrastructure.Migrations
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Admin", b =>
                 {
+                    b.Navigation("AdminNotifications");
+
                     b.Navigation("RefreshTokens");
                 });
 
@@ -1578,9 +1720,22 @@ namespace AttarStore.Infrastructure.Migrations
                 {
                     b.Navigation("Cart");
 
+                    b.Navigation("ClientNotifications");
+
                     b.Navigation("Orders");
 
                     b.Navigation("RefreshTokens");
+                });
+
+            modelBuilder.Entity("AttarStore.Domain.Entities.Notification", b =>
+                {
+                    b.Navigation("AdminNotifications");
+
+                    b.Navigation("ClientNotifications");
+
+                    b.Navigation("UserNotifications");
+
+                    b.Navigation("VendorNotifications");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Shopping.Cart", b =>
@@ -1599,6 +1754,8 @@ namespace AttarStore.Infrastructure.Migrations
 
                     b.Navigation("RefreshTokens");
 
+                    b.Navigation("UserNotifications");
+
                     b.Navigation("UserPermissions");
                 });
 
@@ -1609,6 +1766,8 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("Users");
+
+                    b.Navigation("VendorNotifications");
                 });
 
             modelBuilder.Entity("ProductVariant", b =>

@@ -1,4 +1,4 @@
-﻿using AttarStore.Domain.Entities.Auth;
+﻿using AttarStore.Domain.Entities;
 using AttarStore.Domain.Interfaces;
 using AttarStore.Infrastructure.Services;
 using AttarStore.Services.Data;
@@ -16,32 +16,58 @@ namespace AttarStore.Infrastructure.Repositories
         private readonly AppDbContext _ctx;
         public NotificationRepository(AppDbContext ctx) => _ctx = ctx;
 
-        public async Task<Notification> AddAsync(Notification notification)
+        public async Task<Notification> AddAsync(Notification n)
         {
-            _ctx.Notifications.Add(notification);
+            var ent = await _ctx.Notifications.AddAsync(n);
             await _ctx.SaveChangesAsync();
-            return notification;
+            return ent.Entity;
         }
 
-        public async Task DeleteAsync(Notification notification)
+        public async Task AddUserLinkAsync(int nid, int uid)
         {
-            _ctx.Notifications.Remove(notification);
+            _ctx.UserNotifications.Add(new UserNotification { NotificationId = nid, UserId = uid });
             await _ctx.SaveChangesAsync();
         }
 
-        public async Task<Notification?> GetByIdAsync(int id) =>
-            await _ctx.Notifications.FindAsync(id);
-
-        public async Task<IEnumerable<Notification>> GetByUserAsync(int userId) =>
-            await _ctx.Notifications
-                .Where(n => n.UserId == userId)
-                .OrderByDescending(n => n.SentAt)
-                .ToListAsync();
-
-        public async Task UpdateAsync(Notification notification)
+        public async Task AddAdminLinkAsync(int nid, int aid)
         {
-            _ctx.Notifications.Update(notification);
+            _ctx.AdminNotifications.Add(new AdminNotification { NotificationId = nid, AdminId = aid });
             await _ctx.SaveChangesAsync();
+        }
+
+        public async Task AddClientLinkAsync(int nid, int cid)
+        {
+            _ctx.ClientNotifications.Add(new ClientNotification { NotificationId = nid, ClientId = cid });
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task AddVendorLinkAsync(int nid, int vid)
+        {
+            _ctx.VendorNotifications.Add(new VendorNotification { NotificationId = nid, VendorId = vid });
+            await _ctx.SaveChangesAsync();
+        }
+
+        public Task<IEnumerable<Notification>> GetForUserAsync(int uid)
+            => Task.FromResult(_ctx.UserNotifications
+                 .Where(x => x.UserId == uid)
+                 .Select(x => x.Notification)
+                 .OrderByDescending(n => n.SentAt)
+                 .AsEnumerable());
+
+        public Task<IEnumerable<Notification>> GetAllAsync()
+            => Task.FromResult(_ctx.Notifications
+                 .OrderByDescending(n => n.SentAt)
+                 .AsEnumerable());
+
+        public async Task MarkAsReadAsync(int userId, int notificationId)
+        {
+            var link = await _ctx.UserNotifications
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.NotificationId == notificationId);
+            if (link != null)
+            {
+                link.IsRead = true;
+                await _ctx.SaveChangesAsync();
+            }
         }
     }
 }

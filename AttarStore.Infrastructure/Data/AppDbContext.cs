@@ -49,7 +49,11 @@ namespace AttarStore.Services.Data
 
         // ─── Notifications ──────────────────────────────────────────────────────────
 
-        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<UserNotification> UserNotifications { get; set; } = null!;
+        public DbSet<AdminNotification> AdminNotifications { get; set; } = null!;
+        public DbSet<ClientNotification> ClientNotifications { get; set; } = null!;
+        public DbSet<VendorNotification> VendorNotifications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -270,15 +274,39 @@ namespace AttarStore.Services.Data
             // ─── Notifications ─────────────────────────────────────────────────────────
 
 
-            modelBuilder.Entity<Notification>(b =>
-            {
-                b.ToTable("Notifications");
-                b.HasKey(x => x.Id);
-                b.HasOne<User>()                   // adjust if your User entity namespace differs
-                 .WithMany()
-                 .HasForeignKey(x => x.UserId)
-                 .OnDelete(DeleteBehavior.Cascade);
-            });
+            // UserNotification
+            modelBuilder.Entity<UserNotification>()
+             .HasKey(un => new { un.UserId, un.NotificationId });
+            modelBuilder.Entity<UserNotification>()
+             .HasOne(un => un.User).WithMany(u => u.UserNotifications).HasForeignKey(un => un.UserId);
+            modelBuilder.Entity<UserNotification>()
+             .HasOne(un => un.Notification).WithMany(n => n.UserNotifications).HasForeignKey(un => un.NotificationId);
+
+            // AdminNotification
+            modelBuilder.Entity<AdminNotification>()
+             .HasKey(an => new { an.AdminId, an.NotificationId });
+            modelBuilder.Entity<AdminNotification>()
+             .HasOne(an => an.Admin).WithMany(a => a.AdminNotifications).HasForeignKey(an => an.AdminId);
+            modelBuilder.Entity<AdminNotification>()
+             .HasOne(an => an.Notification).WithMany(n => n.AdminNotifications).HasForeignKey(an => an.NotificationId);
+
+            // ClientNotification
+            modelBuilder.Entity<ClientNotification>()
+             .HasKey(cn => new { cn.ClientId, cn.NotificationId });
+            modelBuilder.Entity<ClientNotification>()
+             .HasOne(cn => cn.Client).WithMany(c => c.ClientNotifications).HasForeignKey(cn => cn.ClientId);
+            modelBuilder.Entity<ClientNotification>()
+             .HasOne(cn => cn.Notification).WithMany(n => n.ClientNotifications).HasForeignKey(cn => cn.NotificationId);
+
+            // VendorNotification
+            modelBuilder.Entity<VendorNotification>()
+             .HasKey(vn => new { vn.VendorId, vn.NotificationId });
+            modelBuilder.Entity<VendorNotification>()
+             .HasOne(vn => vn.Vendor).WithMany(v => v.VendorNotifications).HasForeignKey(vn => vn.VendorId);
+            modelBuilder.Entity<VendorNotification>()
+             .HasOne(vn => vn.Notification).WithMany(n => n.VendorNotifications).HasForeignKey(vn => vn.NotificationId);
+
+
 
             // ─── Seed: Default Admin ───────────────────────────────────────────────
             var adminPassword = BCrypt.Net.BCrypt.HashPassword("password");

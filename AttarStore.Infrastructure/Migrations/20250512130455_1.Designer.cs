@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttarStore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250512083723_4")]
-    partial class _4
+    [Migration("20250512130455_1")]
+    partial class _1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,11 +84,11 @@ namespace AttarStore.Infrastructure.Migrations
                         {
                             Id = 1,
                             Address = "",
-                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 12, 8, 37, 22, 935, DateTimeKind.Unspecified).AddTicks(2377), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 5, 12, 13, 4, 55, 218, DateTimeKind.Unspecified).AddTicks(5116), new TimeSpan(0, 0, 0, 0, 0)),
                             Email = "ahmad.al.shelhawi@gmail.com",
                             IsDeleted = false,
                             Name = "admin",
-                            Password = "$2a$11$7oz.5pAMNNKZY3MHBz1qjOJjBXohjIFCk8SnXLKuU8zZbcoN3z1aO",
+                            Password = "$2a$11$hsvMRx9C.sfcjEwudkHva.KKurc.ynf2uoZB9FWa0bwQt7MuzGoMG",
                             Phone = "096654467",
                             Role = "Admin"
                         });
@@ -153,6 +153,12 @@ namespace AttarStore.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AdminId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
@@ -173,9 +179,18 @@ namespace AttarStore.Infrastructure.Migrations
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("VendorId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("ClientId");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("VendorId");
 
                     b.ToTable("Notifications", (string)null);
                 });
@@ -1289,10 +1304,33 @@ namespace AttarStore.Infrastructure.Migrations
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.Notification", b =>
                 {
-                    b.HasOne("AttarStore.Domain.Entities.User", null)
+                    b.HasOne("AttarStore.Domain.Entities.Admin", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AttarStore.Domain.Entities.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AttarStore.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AttarStore.Domain.Entities.Vendor", "Vendor")
+                        .WithMany()
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("Client");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Vendor");
                 });
 
             modelBuilder.Entity("AttarStore.Domain.Entities.Auth.RefreshToken", b =>

@@ -9,11 +9,14 @@ namespace AttarStore.Infrastructure.Interfaces
 {
     public interface INotificationService
     {
-        Task<NotificationDto> CreateForUserAsync(CreateNotificationDto dto);
-        Task<IEnumerable<NotificationDto>> CreateForRoleAsync(CreateNotificationDto dto, string roleName);
-        Task<IEnumerable<NotificationDto>> CreateForAllAsync(CreateNotificationDto dto);
-        Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(int userId);
-        Task MarkAsReadAsync(int notificationId);
-        Task DeleteAsync(int notificationId);
+        Task SendToUserAsync(int userId, string title, string message);
+        Task SendToAdminAsync(int adminId, string title, string message);
+        Task SendToClientAsync(int clientId, string title, string message);
+        Task SendToVendorStoreAsync(int vendorId, string title, string message);
+        Task SendToUserRoleAsync(string roleName, string title, string message);
+        Task BroadcastAsync(string title, string message);
+        Task<IEnumerable<NotificationDto>> GetInboxAsync(int currentUserId);
+        Task<IEnumerable<NotificationDto>> GetAllAsync();
+        Task MarkAsReadAsync(int userId, int notificationId);
     }
 }

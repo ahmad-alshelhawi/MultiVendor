@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AttarStore.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class _2 : Migration
+    public partial class _1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -92,23 +92,6 @@ namespace AttarStore.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clients", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Notifications",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: true),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Notifications", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -344,6 +327,51 @@ namespace AttarStore.Infrastructure.Migrations
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Products_Vendors_VendorId",
+                        column: x => x.VendorId,
+                        principalTable: "Vendors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: true),
+                    AdminId = table.Column<int>(type: "int", nullable: true),
+                    ClientId = table.Column<int>(type: "int", nullable: true),
+                    VendorId = table.Column<int>(type: "int", nullable: true),
+                    TargetRole = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Admins_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "Admins",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Clients_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Vendors_VendorId",
                         column: x => x.VendorId,
                         principalTable: "Vendors",
                         principalColumn: "Id",
@@ -596,7 +624,7 @@ namespace AttarStore.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "Address", "CreatedAt", "Email", "IsDeleted", "Name", "Password", "Phone", "ResetToken", "ResetTokenExpiry", "Role" },
-                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 9, 7, 12, 28, 279, DateTimeKind.Unspecified).AddTicks(4098), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$ido2xCnkzLGGFrScgRlHnuMSp8Nl4CFfyWsRhvDrPP30Fl2ggPeqO", "096654467", null, null, "Admin" });
+                values: new object[] { 1, "", new DateTimeOffset(new DateTime(2025, 5, 12, 13, 4, 55, 218, DateTimeKind.Unspecified).AddTicks(5116), new TimeSpan(0, 0, 0, 0, 0)), "ahmad.al.shelhawi@gmail.com", false, "admin", "$2a$11$hsvMRx9C.sfcjEwudkHva.KKurc.ynf2uoZB9FWa0bwQt7MuzGoMG", "096654467", null, null, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "Permissions",
@@ -742,6 +770,26 @@ namespace AttarStore.Infrastructure.Migrations
                 name: "IX_InventoryTransactions_UserId",
                 table: "InventoryTransactions",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_AdminId",
+                table: "Notifications",
+                column: "AdminId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_ClientId",
+                table: "Notifications",
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_VendorId",
+                table: "Notifications",
+                column: "VendorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId_ProductVariantId",

@@ -43,6 +43,10 @@ namespace AttarStore.Domain.Entities
 
         public ICollection<InventoryTransaction> InventoryTransactions { get; set; }
              = new List<InventoryTransaction>();
+        public ICollection<UserNotification> UserNotifications { get; set; }
+             = new List<UserNotification>();
+
+
 
 
 

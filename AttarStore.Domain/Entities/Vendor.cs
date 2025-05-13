@@ -21,5 +21,7 @@ namespace AttarStore.Domain.Entities
             = new List<Product>();
         public ICollection<CategoryRequest> CategoryRequests { get; set; }
             = new List<CategoryRequest>();
+        public ICollection<VendorNotification> VendorNotifications { get; set; }
+            = new List<VendorNotification>();
     }
 }

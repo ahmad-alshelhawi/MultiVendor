@@ -27,5 +27,6 @@ namespace AttarStore.Domain.Interfaces
         // Reset flow
         Task<string> GenerateResetTokenAsync(string email);
         Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
+
     }
 }

@@ -35,6 +35,9 @@ namespace AttarStore.Domain.Entities
         // Client‐specific navigations
         public Cart? Cart { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
-/*        public ICollection<ActionLog> ActionLogs { get; set; } = new List<ActionLog>();
-*/    }
+
+        public ICollection<ClientNotification> ClientNotifications { get; set; }
+            = new List<ClientNotification>();
+
+    }
 }

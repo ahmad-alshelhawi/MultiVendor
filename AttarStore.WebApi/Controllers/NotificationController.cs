@@ -1,6 +1,7 @@
 ﻿// WebApi/Controllers/NotificationController.cs
 using AttarStore.Application.Dtos;
 using AttarStore.Application.Interfaces;
+using AttarStore.Domain.Entities.Auth;
 using AttarStore.Domain.Interfaces;
 using AttarStore.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,58 +9,89 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
 [ApiController]
-[Authorize]
+[Route("api/[controller]")]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _svc;
     public NotificationController(INotificationService svc) => _svc = svc;
 
-    [HttpPost("user")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> SendToUser([FromBody] CreateNotificationDto dto)
+    [HttpPost("user/{userId}")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> ToUser(int userId, [FromBody] CreateNotificationDto dto)
     {
-        var result = await _svc.CreateForUserAsync(dto);
-        return CreatedAtAction(nameof(GetMine), new { }, result);
+        await _svc.SendToUserAsync(userId, dto.Title, dto.Message);
+        return NoContent();
+    }
+
+    [HttpPost("admin/{adminId}")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> ToAdmin(int adminId, [FromBody] CreateNotificationDto dto)
+    {
+        await _svc.SendToAdminAsync(adminId, dto.Title, dto.Message);
+        return NoContent();
+    }
+
+    [HttpPost("client/{clientId}")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> ToClient(int clientId, [FromBody] CreateNotificationDto dto)
+    {
+        await _svc.SendToClientAsync(clientId, dto.Title, dto.Message);
+        return NoContent();
+    }
+
+    [HttpPost("vendor/{vendorId}")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> ToVendor(int vendorId, [FromBody] CreateNotificationDto dto)
+    {
+        await _svc.SendToVendorStoreAsync(vendorId, dto.Title, dto.Message);
+        return NoContent();
     }
 
     [HttpPost("role/{roleName}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> SendToRole(string roleName, [FromBody] CreateNotificationDto dto)
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> ToUserRole(string roleName, [FromBody] CreateNotificationDto dto)
     {
-        var list = await _svc.CreateForRoleAsync(dto, roleName);
-        return Created("", list);
+        if (roleName != Roles.AdminUser
+         && roleName != Roles.VendorAdmin
+         && roleName != Roles.VendorUser)
+            return BadRequest("Invalid role");
+        await _svc.SendToUserRoleAsync(roleName, dto.Title, dto.Message);
+        return NoContent();
     }
 
-    [HttpPost("all")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost("broadcast")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Broadcast([FromBody] CreateNotificationDto dto)
     {
-        var list = await _svc.CreateForAllAsync(dto);
-        return Created("", list);
+        await _svc.BroadcastAsync(dto.Title, dto.Message);
+        return NoContent();
     }
 
     [HttpGet("mine")]
-    public async Task<IActionResult> GetMine()
+    [Authorize]
+    public async Task<IActionResult> Mine()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var list = await _svc.GetUserNotificationsAsync(userId);
-        return Ok(list);
+        var uid = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var inbox = await _svc.GetInboxAsync(uid);
+        return Ok(inbox);
     }
 
-    [HttpPut("{id}/read")]
-    public async Task<IActionResult> MarkRead(int id)
+    [HttpGet("all")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> All()
     {
-        await _svc.MarkAsReadAsync(id);
+        var all = await _svc.GetAllAsync();
+        return Ok(all);
+    }
+
+    [HttpPut("read/{notificationId}")]
+    [Authorize]
+    public async Task<IActionResult> MarkRead(int notificationId)
+    {
+        var uid = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        await _svc.MarkAsReadAsync(uid, notificationId);
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        await _svc.DeleteAsync(id);
-        return NoContent();
-    }
 }

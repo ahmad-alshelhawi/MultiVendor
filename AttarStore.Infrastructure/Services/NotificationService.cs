@@ -1,4 +1,5 @@
 ﻿using AttarStore.Application.Dtos;
+using AttarStore.Domain.Entities;
 using AttarStore.Domain.Entities.Auth;
 using AttarStore.Domain.Interfaces;
 using AttarStore.Infrastructure.Hubs;
@@ -13,111 +14,98 @@ using System.Threading.Tasks;
 
 namespace AttarStore.Infrastructure.Services
 {
-
-
     public class NotificationService : INotificationService
     {
-        private readonly INotificationRepository _repo;
-        private readonly IUserRepository _userRepo;
+        private readonly INotificationRepository _nr;
+        private readonly IVendorRepository _vr;
+        private readonly IUserRepository _ur;
         private readonly IHubContext<NotificationHub> _hub;
-        private readonly IMapper _mapper;
+        private readonly IMapper _map;
 
         public NotificationService(
-            INotificationRepository repo,
-            IUserRepository userRepo,
+            INotificationRepository nr,
+            IVendorRepository vr,
+            IUserRepository ur,
             IHubContext<NotificationHub> hub,
-            IMapper mapper)
+            IMapper map)
         {
-            _repo = repo;
-            _userRepo = userRepo;
+            _nr = nr;
+            _vr = vr;
+            _ur = ur;
             _hub = hub;
-            _mapper = mapper;
+            _map = map;
         }
 
-        public async Task<NotificationDto> CreateForUserAsync(CreateNotificationDto dto)
+        public async Task SendToUserAsync(int userId, string title, string message)
         {
-            var entity = new Notification
-            {
-                UserId = dto.UserId,
-                Title = dto.Title,
-                Message = dto.Message
-            };
-            var saved = await _repo.AddAsync(entity);
-            var result = _mapper.Map<NotificationDto>(saved);
-
-            // real-time push
-            await _hub.Clients.User(dto.UserId.ToString())
-                      .SendAsync("ReceiveNotification", result);
-
-            return result;
+            var n = await _nr.AddAsync(new Notification { Title = title, Message = message });
+            await _nr.AddUserLinkAsync(n.Id, userId);
+            await _hub.Clients.Group($"User_{userId}")
+                      .SendAsync("ReceiveNotification", _map.Map<NotificationDto>(n));
         }
 
-        public async Task<IEnumerable<NotificationDto>> CreateForRoleAsync(CreateNotificationDto dto, string roleName)
+        public async Task SendToAdminAsync(int adminId, string title, string message)
         {
-            var users = await _userRepo.GetByRoleAsync(roleName);
-            var created = new List<NotificationDto>();
+            var n = await _nr.AddAsync(new Notification { Title = title, Message = message });
+            await _nr.AddAdminLinkAsync(n.Id, adminId);
+            await _hub.Clients.Group($"Admin_{adminId}")
+                      .SendAsync("ReceiveNotification", _map.Map<NotificationDto>(n));
+        }
 
+        public async Task SendToClientAsync(int clientId, string title, string message)
+        {
+            var n = await _nr.AddAsync(new Notification { Title = title, Message = message });
+            await _nr.AddClientLinkAsync(n.Id, clientId);
+            await _hub.Clients.Group($"Client_{clientId}")
+                      .SendAsync("ReceiveNotification", _map.Map<NotificationDto>(n));
+        }
+
+        public async Task SendToVendorStoreAsync(int vendorId, string title, string message)
+        {
+            var n = await _nr.AddAsync(new Notification { Title = title, Message = message });
+            await _nr.AddVendorLinkAsync(n.Id, vendorId);
+
+            var users = await _vr.GetAssignedUsersAsync(vendorId);
             foreach (var u in users)
             {
-                var entity = new Notification
-                {
-                    UserId = u.Id,
-                    TargetRole = roleName,
-                    Title = dto.Title,
-                    Message = dto.Message
-                };
-                var saved = await _repo.AddAsync(entity);
-                var dtoOut = _mapper.Map<NotificationDto>(saved);
-                created.Add(dtoOut);
+                await _nr.AddUserLinkAsync(n.Id, u.Id);
+                await _hub.Clients.Group($"User_{u.Id}")
+                          .SendAsync("ReceiveNotification", _map.Map<NotificationDto>(n));
             }
-
-            // group push
-            await _hub.Clients.Group(roleName)
-                      .SendAsync("ReceiveNotification", created);
-
-            return created;
         }
 
-        public async Task<IEnumerable<NotificationDto>> CreateForAllAsync(CreateNotificationDto dto)
+        public async Task SendToUserRoleAsync(string roleName, string title, string message)
         {
-            var users = await _userRepo.GetAllAsync();
-            var created = new List<NotificationDto>();
-
+            var n = await _nr.AddAsync(new Notification { Title = title, Message = message });
+            var users = await _ur.GetByRoleAsync(roleName);
             foreach (var u in users)
             {
-                var entity = new Notification
-                {
-                    UserId = u.Id,
-                    Title = dto.Title,
-                    Message = dto.Message
-                };
-                var saved = await _repo.AddAsync(entity);
-                created.Add(_mapper.Map<NotificationDto>(saved));
+                await _nr.AddUserLinkAsync(n.Id, u.Id);
+                await _hub.Clients.Group($"User_{u.Id}")
+                          .SendAsync("ReceiveNotification", _map.Map<NotificationDto>(n));
             }
-
-            await _hub.Clients.All.SendAsync("ReceiveNotification", created);
-            return created;
         }
 
-        public async Task DeleteAsync(int notificationId)
+        public async Task BroadcastAsync(string title, string message)
         {
-            var n = await _repo.GetByIdAsync(notificationId)
-                ?? throw new KeyNotFoundException("Notification not found");
-            await _repo.DeleteAsync(n);
+            var n = await _nr.AddAsync(new Notification { Title = title, Message = message });
+            await _hub.Clients.All
+                      .SendAsync("ReceiveNotification", _map.Map<NotificationDto>(n));
         }
 
-        public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(int userId)
+        public async Task<IEnumerable<NotificationDto>> GetInboxAsync(int currentUserId)
         {
-            var list = await _repo.GetByUserAsync(userId);
-            return _mapper.Map<IEnumerable<NotificationDto>>(list);
+            var list = await _nr.GetForUserAsync(currentUserId);
+            return list.Select(n => _map.Map<NotificationDto>(n));
         }
 
-        public async Task MarkAsReadAsync(int notificationId)
+        public async Task<IEnumerable<NotificationDto>> GetAllAsync()
         {
-            var n = await _repo.GetByIdAsync(notificationId)
-                ?? throw new KeyNotFoundException("Notification not found");
-            n.IsRead = true;
-            await _repo.UpdateAsync(n);
+            var all = await _nr.GetAllAsync();
+            return all.Select(n => _map.Map<NotificationDto>(n));
         }
+
+        public async Task MarkAsReadAsync(int userId, int notificationId)
+            => await _nr.MarkAsReadAsync(userId, notificationId);
     }
 }

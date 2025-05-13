@@ -17,7 +17,9 @@ namespace AttarStore.Domain.Interfaces
         Task<Vendor> GetByIdAsync(int id);
         Task<Vendor> GetByNameAsync(string name);
         Task<Vendor> GetByContactEmailAsync(string email);
-            
+
+        Task<IEnumerable<User>> GetUsersByVendorIdAsync(int vendorId);
+
         Task AddAsync(Vendor vendor);
         Task UpdateAsync(Vendor vendor);
 
@@ -30,5 +32,8 @@ namespace AttarStore.Domain.Interfaces
         /// Persists pending changes.
         /// </summary>
         Task<bool> SaveChangesAsync();
+
+        Task<IEnumerable<User>> GetAssignedUsersAsync(int vendorId);
+
     }
 }

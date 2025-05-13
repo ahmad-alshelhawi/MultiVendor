@@ -1,6 +1,6 @@
 ﻿// AttarStore.Application/MappingProfiles/NotificationProfile.cs
 using AttarStore.Application.Dtos;
-using AttarStore.Domain.Entities.Auth; // adjust if your Notification entity lives elsewhere
+using AttarStore.Domain.Entities;
 using AutoMapper;
 
 namespace AttarStore.Application.MappingProfiles

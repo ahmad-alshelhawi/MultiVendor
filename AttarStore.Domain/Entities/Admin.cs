@@ -30,5 +30,7 @@ namespace AttarStore.Domain.Entities
         // Refresh tokens
         public ICollection<RefreshToken> RefreshTokens { get; set; }
             = new List<RefreshToken>();
+        public ICollection<AdminNotification> AdminNotifications { get; set; }
+            = new List<AdminNotification>();
     }
 }
