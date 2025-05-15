@@ -1,5 +1,7 @@
-﻿using Castle.Core.Smtp;
+﻿using AttarStore.Application.Settings;
+using Castle.Core.Smtp;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -8,32 +10,38 @@ namespace AttarStore.Infrastructure.Services
 {
     public class EmailSender : IEmailSender
     {
-        private readonly IConfiguration _config;
+        private readonly EmailSettings _smtp;
 
-        public EmailSender(IConfiguration config)
+        public EmailSender(IOptions<EmailSettings> options)
         {
-            _config = config;
+            _smtp = options.Value;
         }
 
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var smtpClient = new SmtpClient(_config["Smtp:Host"])
+            // 1) Guard against null/empty
+            if (string.IsNullOrWhiteSpace(email)) return;
+
+            // 2) Validate format
+            if (!System.Net.Mail.MailAddress.TryCreate(email, out var toAddress))
+                return;
+
+            using var client = new SmtpClient(_smtp.Host, _smtp.Port)
             {
-                Port = int.Parse(_config["Smtp:Port"]),
-                Credentials = new NetworkCredential(_config["Smtp:Username"], _config["Smtp:Password"]),
-                EnableSsl = true
+                Credentials = new NetworkCredential(_smtp.Username, _smtp.Password),
+                EnableSsl = _smtp.EnableSsl
             };
 
-            var mailMessage = new MailMessage
+            using var mail = new MailMessage
             {
-                From = new MailAddress(_config["Smtp:FromEmail"]),
+                From = new MailAddress(_smtp.FromEmail, _smtp.FromName),
                 Subject = subject,
                 Body = message,
-                IsBodyHtml = true,
+                IsBodyHtml = true
             };
-            mailMessage.To.Add(email);
+            mail.To.Add(toAddress);
 
-            await smtpClient.SendMailAsync(mailMessage);
+            await client.SendMailAsync(mail);
         }
     }
 }

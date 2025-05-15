@@ -2,7 +2,7 @@
 using AttarStore.Domain.Interfaces.Shopping;
 using AttarStore.Services.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,15 +13,22 @@ namespace AttarStore.Infrastructure.Repositories.Shopping
         private readonly AppDbContext _db;
         public OrderRepository(AppDbContext db) => _db = db;
 
+        // ─── now includes Items → ProductVariant → Product ─────────────────────
         public async Task<Order> GetByIdAsync(int id) =>
             await _db.Orders
+                     .Where(o => o.Id == id)
                      .Include(o => o.Items)
-                     .FirstOrDefaultAsync(o => o.Id == id);
+                       .ThenInclude(oi => oi.ProductVariant)
+                         .ThenInclude(pv => pv.Product)
+                     .FirstOrDefaultAsync();
 
+        // ─── same for list endpoint ───────────────────────────────────────────
         public async Task<Order[]> GetAllForClientAsync(int clientId) =>
             await _db.Orders
                      .Where(o => o.ClientId == clientId)
                      .Include(o => o.Items)
+                       .ThenInclude(oi => oi.ProductVariant)
+                         .ThenInclude(pv => pv.Product)
                      .ToArrayAsync();
 
         public async Task<Order> CreateAsync(Order order)
@@ -33,11 +40,12 @@ namespace AttarStore.Infrastructure.Repositories.Shopping
 
         public async Task<Order> CheckoutAsync(int clientId)
         {
-            // 1) load cart + items
+            // 1) load cart + items (already includes ProductVariant)
             var cart = await _db.Carts
                 .Include(c => c.Items)
                    .ThenInclude(ci => ci.ProductVariant)
                 .FirstOrDefaultAsync(c => c.ClientId == clientId);
+
             if (cart == null || !cart.Items.Any())
                 throw new InvalidOperationException("Cart is empty.");
 
@@ -53,9 +61,7 @@ namespace AttarStore.Infrastructure.Repositories.Shopping
             // 3) move each cart‐item → order‐item, adjust stock, record inventory tx
             foreach (var ci in cart.Items)
             {
-                // a) decrement stock
                 ci.ProductVariant.Stock -= ci.Quantity;
-                // b) persist inventory transaction
                 _db.InventoryTransactions.Add(new InventoryTransaction
                 {
                     ProductVariantId = ci.ProductVariantId,
@@ -66,7 +72,6 @@ namespace AttarStore.Infrastructure.Repositories.Shopping
                     Timestamp = DateTime.UtcNow
                 });
 
-                // c) attach to order
                 _db.OrderItems.Add(new OrderItem
                 {
                     OrderId = order.Id,
@@ -82,9 +87,8 @@ namespace AttarStore.Infrastructure.Repositories.Shopping
             // 5) save everything
             await _db.SaveChangesAsync();
 
-            // 6) return populated order
+            // 6) return fully‐populated order
             return await GetByIdAsync(order.Id);
         }
     }
 }
-

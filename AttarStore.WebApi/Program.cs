@@ -1,15 +1,18 @@
 ﻿using AttarStore.Api.Profiles;
 using AttarStore.Api.Utils;
 using AttarStore.Application.MappingProfiles;
+using AttarStore.Application.Settings;            // ← ADDED (for EmailSettings)
 using AttarStore.Domain.Interfaces;
 using AttarStore.Domain.Interfaces.Catalog;
 using AttarStore.Domain.Interfaces.Shopping;
+using AttarStore.Infrastructure.Events;
 using AttarStore.Infrastructure.Hubs;
 using AttarStore.Infrastructure.Interfaces;
 using AttarStore.Infrastructure.Repositories;
 using AttarStore.Infrastructure.Repositories.Catalog;
 using AttarStore.Infrastructure.Repositories.Shopping;
-using AttarStore.Infrastructure.Services;
+using AttarStore.Infrastructure.Services;         // ← ADDED (for EmailSender)
+using AttarStore.Infrastructure.Services;         // for IEmailSender alias
 using AttarStore.Services;
 using AttarStore.Services.Data;
 using AttarStore.Services.Interfaces.Catalog;
@@ -18,6 +21,7 @@ using AttarStore.Services.Repositories.Catalog;
 using AttarStore.WebApi.Authorization;
 using AttarStore.WebApi.Filters;
 using AttarStore.WebApi.Providers;
+using MediatR;                                     // ← ADDED (for IMediator)
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
@@ -40,6 +44,11 @@ builder.Services.AddDbContextPool<AppDbContext>(options =>
         .UseSqlServer(builder.Configuration.GetConnectionString(connName))
         .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
+
+// ─── Email Settings & Service ────────────────────────────────────────────────
+builder.Services.Configure<EmailSettings>(                                       // ← ADDED
+    builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailSender, EmailSender>();                       // ← ADDED
 
 // ─── Cookie Policy ─────────────────────────────────────────────────────────
 builder.Services.Configure<CookiePolicyOptions>(options =>
@@ -223,7 +232,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 // Token & email
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<TokenService>();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
+//builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IVendorService, VendorService>();
 
 // Permission management
@@ -243,6 +252,15 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
+
+// ─── MediatR Setup ───────────────────────────────────────────────────────────
+// ✅ use the Action‐based overload and register your event/handler assembly
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(OrderPlacedEvent).Assembly);
+});
+
+
 
 
 // ─── Controllers & Swagger ─────────────────────────────────────────────────

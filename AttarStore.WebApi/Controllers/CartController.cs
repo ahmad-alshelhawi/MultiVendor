@@ -30,7 +30,7 @@ namespace AttarStore.WebApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = Roles.Client)]
+        //[Authorize(Roles = Roles.Client)]
         public async Task<IActionResult> GetCart()
         {
             var clientId = GetClientId();
@@ -39,7 +39,7 @@ namespace AttarStore.WebApi.Controllers
         }
 
         [HttpPost("items")]
-        [Authorize(Roles = Roles.Client)]
+        //[Authorize(Roles = Roles.Client)]
         public async Task<IActionResult> AddItem([FromBody] CartItemCreate dto)
         {
             var clientId = GetClientId();
@@ -48,7 +48,7 @@ namespace AttarStore.WebApi.Controllers
         }
 
         [HttpPut("items/{id:int}")]
-        [Authorize(Roles = Roles.Client)]
+        //[Authorize(Roles = Roles.Client)]
         public async Task<IActionResult> UpdateItem(int id, [FromBody] CartItemUpdate dto)
         {
             var item = await _cartRepo.UpdateItemAsync(id, dto.Quantity);
@@ -56,7 +56,7 @@ namespace AttarStore.WebApi.Controllers
         }
 
         [HttpDelete("items/{id:int}")]
-        [Authorize(Roles = Roles.Client)]
+        //[Authorize(Roles = Roles.Client)]
         public async Task<IActionResult> RemoveItem(int id)
         {
             await _cartRepo.RemoveItemAsync(id);
@@ -64,7 +64,7 @@ namespace AttarStore.WebApi.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = Roles.Client)]
+        //[Authorize(Roles = Roles.Client)]
         public async Task<IActionResult> ClearCart()
         {
             var clientId = GetClientId();

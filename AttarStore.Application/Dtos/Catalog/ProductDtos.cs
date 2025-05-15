@@ -11,6 +11,8 @@ namespace AttarStore.Application.Dtos.Catalog
         public string Description { get; set; }
         public string Details { get; set; }
         public int? SubcategoryId { get; set; }
+        public int? VendorId { get; set; }
+        public string VendorName { get; set; }
 
         // if you want the product itself (no variants) to carry stock & price:
         public decimal? DefaultPrice { get; set; }
